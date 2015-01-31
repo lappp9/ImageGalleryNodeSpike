@@ -5,6 +5,7 @@
 
 @property (nonatomic) ImageGalleryNode *imageGallery;
 @property (nonatomic) RainbowNode *rainbow;
+@property (weak, nonatomic) IBOutlet UIButton *tapMeButton;
 
 @end
 
@@ -25,11 +26,13 @@
     ImageGalleryNode *imageGallery = [[ImageGalleryNode alloc] init];
     imageGallery.frame = CGRectMake(0, self.view.bounds.size.height - 240, galleryWidth, 240);
     imageGallery.dataSource = self;
-    imageGallery.clipsToBounds = YES;
+//    imageGallery.clipsToBounds = YES;
     
 //    [self.view addSubview:rainBowNode.view];
     [self.view addSubview:imageGallery.view];
-
+}
+- (IBAction)tapMeButtonWasTapped:(id)sender {
+    
 }
 
 -(BOOL)shouldAutorotate;
@@ -46,7 +49,7 @@
 
 -(NSInteger)numberOfImagesInImageGallery:(ImageGalleryNode *)imageGallery;
 {
-    return 10;
+    return 20;
 }
 
 - (BOOL)prefersStatusBarHidden;

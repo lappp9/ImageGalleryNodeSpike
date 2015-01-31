@@ -20,12 +20,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ImageGallerySpike/ImageGalleryNode.m"
-            timestampString = "444414617.472626"
+            timestampString = "444422131.896634"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "245"
-            endingLineNumber = "245"
-            landmarkName = "-calcualteFinalCenters"
+            startingLineNumber = "45"
+            endingLineNumber = "45"
+            landmarkName = "-layout"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
