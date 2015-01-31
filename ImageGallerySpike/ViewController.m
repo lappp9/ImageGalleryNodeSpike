@@ -22,6 +22,7 @@
     ImageGalleryNode *imageGallery = [[ImageGalleryNode alloc] init];
     imageGallery.frame = CGRectMake(0, self.view.bounds.size.height - 240, galleryWidth, 240);
     imageGallery.dataSource = self;
+    imageGallery.delegate = self;
 
     [self.view addSubview:imageGallery.view];
 }
@@ -33,11 +34,15 @@
 
 #pragma mark Image Gallery Datasource
 
-- (NSString *)imageGallery:(ImageGalleryNode *)imageGallery urlForImageAtIndex:(NSInteger)index;
+- (NSURL *)imageGallery:(ImageGalleryNode *)imageGallery urlForImageAtIndex:(NSInteger)index;
 {
-    CGFloat rand1 = arc4random_uniform(255) + 200;
-    CGFloat rand2 = arc4random_uniform(255) + 200;
-    return [NSString stringWithFormat:@"http://placekitten.com/%f/%f", rand1, rand2];
+    CGFloat rand1 = arc4random_uniform(200) + 200;
+    CGFloat rand2 = arc4random_uniform(200) + 200;
+    NSURL *kittenURL = [NSURL URLWithString:[NSString stringWithFormat:@"http://placekitten.com/%i/%i", (int)rand1, (int)rand2]];
+    
+    
+    
+    return kittenURL;
 }
 
 -(NSInteger)numberOfImagesInImageGallery:(ImageGalleryNode *)imageGallery;

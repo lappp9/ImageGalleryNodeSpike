@@ -13,23 +13,21 @@
 
 @implementation ImageGalleryNode
 
-
-
 /*
  
  //TODO:
- 1) allow asynchronous images
  
- 2) allow swiping up to transfer to full screen
  
- */
+ 1) allow swiping up to transfer to full screen
+ 
+ 
+  */
 
 //-drawParametersForAsyncLayer:
 // this should return a dictionary that configures this view
 // just get teh config stuff from the datasource and then pass it along! i think...
 //right now the time at which to stop the scrolling is hardcoded to like > 50 or < 110
 //in the future do 50 and the windows width - the image's width - 20 or something
-
 
 // move drawing code into drawRect and move all the gesture stuff into didlayoutsubviews or something
 
@@ -50,9 +48,7 @@
 - (void)layout;
 {
     [super layout];
-    //SECOND
-    //remove all subnodes so theres no duplication, i assume i should do this stuff somewhere else
-    
+
     if (self.view.subviews.count != 0) {
         return;
     }
@@ -69,60 +65,46 @@
     NSInteger numberOfImages = [self.dataSource numberOfImagesInImageGallery:self];
     
     for (int i = 0; i < numberOfImages; i++) {
-//        ASNetworkImageNode *imageNode = [[ASNetworkImageNode alloc] init];
-//        imageNode.backgroundColor = [UIColor lightGrayColor];
-//        imageNode.URL = [NSURL URLWithString:[self.dataSource imageGallery:self urlForImageAtIndex:i]];
-//        self.imageNodes[i] = imageNode;
-        
-        ASDisplayNode *node = [[ASDisplayNode alloc] init];
-        node.frame = CGRectMake(self.bounds.origin.x + (50 * i) + 10,
-                                self.bounds.origin.y,
-                                self.bounds.size.width - 100,
-                                500);
         CGFloat imageNodeWidth = self.bounds.size.width/2.5;
         CGFloat imageNodeHeight = self.bounds.size.height;
         
-        CGFloat rand1 = arc4random_uniform(255);
-        CGFloat rand2 = arc4random_uniform(255);
-        CGFloat rand3 = arc4random_uniform(255);
+        ASNetworkImageNode *imageNode = [[ASNetworkImageNode alloc] init];
+        self.imageNodes[i] = imageNode;
+
+        imageNode.backgroundColor = [UIColor lightGrayColor];
+        imageNode.URL = [self.dataSource imageGallery:self urlForImageAtIndex:i];
+        imageNode.frame = CGRectMake(((i * imageNodeWidth) + (i * 4)), 0, imageNodeWidth, imageNodeHeight);
+        imageNode.cornerRadius = 4;
         
-        UIColor *randomColor = [UIColor colorWithRed:rand1/255 green:rand2/255 blue:rand3/255 alpha:1.0];
-        
-        node.frame = CGRectMake(((i * imageNodeWidth) + (i * 4)), 0, imageNodeWidth, imageNodeHeight);
-        node.backgroundColor = randomColor;
-        node.cornerRadius = 4;
-        
-        UILabel *number = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 51, 51)];
-        number.text = [NSString stringWithFormat:@"%d", i+1];
-        number.backgroundColor = [UIColor whiteColor];
-        number.textAlignment = NSTextAlignmentCenter;
-        number.textColor = [UIColor lightGrayColor];
-        number.layer.borderWidth = 1;
-        number.layer.borderColor = [UIColor darkGrayColor].CGColor;
-        
-        [node.view addSubview:number];
-        
-        self.imageNodes[i] = node;
-        self.initialCenters[i] = [NSValue valueWithCGPoint:node.view.center];
-        [self.view addSubview:node.view];
+        if ([self.delegate imageGalleryShouldDisplayPositions]) {
+            [self addPositionLabelToImageNode:imageNode];
+        }
+    
+        self.initialCenters[i] = [NSValue valueWithCGPoint:imageNode.view.center];
+        [self.view addSubview:imageNode.view];
     }
     
     [self calcualteFinalCenters];
 }
 
-- (void)didLoad;
+- (void)addPositionLabelToImageNode:(ASDisplayNode *)imageNode;
 {
-    [super didLoad];
+    NSUInteger i = [self.imageNodes indexOfObject:imageNode];
+
+    UILabel *number = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 51, 51)];
+    number.text = [NSString stringWithFormat:@"%ld", i+1];
+    number.backgroundColor = [UIColor whiteColor];
+    number.textAlignment = NSTextAlignmentCenter;
+    number.textColor = [UIColor lightGrayColor];
+    number.layer.borderWidth = 1;
+    number.layer.borderColor = [UIColor darkGrayColor].CGColor;
     
-    //FIRST
-    
+    [imageNode.view addSubview:number];
 }
 
 - (NSObject *)drawParametersForAsyncLayer:(_ASDisplayLayer *)layer;
 {
-    //THIRD
     NSMutableDictionary *dict = @{}.mutableCopy;
-    
     return dict;
 }
 
@@ -184,9 +166,7 @@
         case UIGestureRecognizerStateChanged:
             _newX = [pan locationInView:self.view].x;
             _difference = _newX - _touchXPosition;
-            
             [self moveAllNodesHorizontallyByDifference];
-            
             _touchXPosition = _newX;
             break;
         case UIGestureRecognizerStateEnded:
@@ -270,21 +250,6 @@
     
     self.finalCenters = [[self.finalCenters reverseObjectEnumerator] allObjects].mutableCopy;
 }
-
-//- (void)moveAllImageNodesHorizontallyByDifference;
-//{
-//    for (ASNetworkImageNode *imageNode in self.imageNodes) {
-//        CGPoint newCenter = CGPointMake((imageNode.view.center.x + _difference), imageNode.view.center.y);
-//        imageNode.view.center = newCenter;
-//    }
-//}
-//
-//- (void)removeAnimations;
-//{
-//    for (ASNetworkImageNode *imageNode in self.imageNodes) {
-//        [imageNode pop_removeAllAnimations];
-//    }
-//}
 
 @end
 

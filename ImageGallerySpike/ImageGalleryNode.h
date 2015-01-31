@@ -18,7 +18,7 @@
 @protocol ImageGalleryDatasource <NSObject>
 
 - (NSInteger)numberOfImagesInImageGallery:(ImageGalleryNode *)imageGallery;
-- (NSString *)imageGallery:(ImageGalleryNode *)imageGallery urlForImageAtIndex:(NSInteger)index;
+- (NSURL *)imageGallery:(ImageGalleryNode *)imageGallery urlForImageAtIndex:(NSInteger)index;
 
 @end
 
