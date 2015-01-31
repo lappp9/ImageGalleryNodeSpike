@@ -17,28 +17,21 @@
     
     self.edgesForExtendedLayout = UIRectEdgeNone;
     
-//    RainbowNode *rainBowNode = [[RainbowNode alloc] init];
-//    rainBowNode.vertical = NO;
-//    rainBowNode.frame  = CGRectMake(10, 50, self.view.bounds.size.width-20, 240);
-    
     CGFloat galleryWidth = self.view.bounds.size.width;
-    
+
     ImageGalleryNode *imageGallery = [[ImageGalleryNode alloc] init];
     imageGallery.frame = CGRectMake(0, self.view.bounds.size.height - 240, galleryWidth, 240);
     imageGallery.dataSource = self;
-//    imageGallery.clipsToBounds = YES;
-    
-//    [self.view addSubview:rainBowNode.view];
+
     [self.view addSubview:imageGallery.view];
-}
-- (IBAction)tapMeButtonWasTapped:(id)sender {
-    
 }
 
 -(BOOL)shouldAutorotate;
 {
     return NO;
 }
+
+#pragma mark Image Gallery Datasource
 
 - (NSString *)imageGallery:(ImageGalleryNode *)imageGallery urlForImageAtIndex:(NSInteger)index;
 {
@@ -51,6 +44,14 @@
 {
     return 20;
 }
+
+#pragma mark Image Gallery Delegate
+
+- (BOOL)imageGalleryShouldDisplayPositions;
+{
+    return true;
+}
+
 
 - (BOOL)prefersStatusBarHidden;
 {

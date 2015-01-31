@@ -2,11 +2,13 @@
 
 #import "ASDisplayNode.h"
 #import <pop/POP.h>
+#import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
+#import <AsyncDisplayKit.h>
 
 @protocol ImageGalleryDatasource;
 @protocol ImageGalleryDelegate;
 
-@interface ImageGalleryNode : ASDisplayNode <POPAnimationDelegate>
+@interface ImageGalleryNode : ASDisplayNode <_ASDisplayLayerDelegate, POPAnimationDelegate>
 
 @property (weak) id <ImageGalleryDatasource> dataSource;
 @property (weak) id <ImageGalleryDelegate> delegate;
@@ -21,6 +23,8 @@
 @end
 
 @protocol ImageGalleryDelegate <NSObject>
+
+- (BOOL)imageGalleryShouldDisplayPositions;
 
 @optional
 

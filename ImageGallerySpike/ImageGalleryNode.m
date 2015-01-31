@@ -1,9 +1,7 @@
 
 #import "ImageGalleryNode.h"
-#import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
-#import <AsyncDisplayKit.h>
 
-@interface ImageGalleryNode ()
+@interface ImageGalleryNode ()<_ASDisplayLayerDelegate, POPAnimationDelegate>
 @property (nonatomic) NSMutableArray *imageNodes;
 @property (nonatomic) CGFloat touchXPosition;
 @property (nonatomic) CGFloat newX;
@@ -15,6 +13,17 @@
 
 @implementation ImageGalleryNode
 
+
+
+/*
+ 
+ //TODO:
+ 1) allow asynchronous images
+ 
+ 2) allow swiping up to transfer to full screen
+ 
+ */
+
 //-drawParametersForAsyncLayer:
 // this should return a dictionary that configures this view
 // just get teh config stuff from the datasource and then pass it along! i think...
@@ -23,6 +32,8 @@
 
 
 // move drawing code into drawRect and move all the gesture stuff into didlayoutsubviews or something
+
+#pragma mark View Drawing
 
 + (void)drawRect:(CGRect)bounds
   withParameters:(id<NSObject>)parameters
@@ -33,19 +44,17 @@
     if (!isRasterizing) {
         [[UIColor blackColor] set];
         UIRectFill(bounds);
-        
-        
     }
 }
-
 
 - (void)layout;
 {
     [super layout];
     //SECOND
     //remove all subnodes so theres no duplication, i assume i should do this stuff somewhere else
-    for (UIView *subview in self.view.subviews) {
-        [subview removeFromSuperview];
+    
+    if (self.view.subviews.count != 0) {
+        return;
     }
     
     self.imageNodes = @[].mutableCopy;
@@ -59,17 +68,12 @@
     
     NSInteger numberOfImages = [self.dataSource numberOfImagesInImageGallery:self];
     
-    //    for (int i = 0; i < numberOfImages; i++) {
-    //        ASNetworkImageNode *imageNode = [[ASNetworkImageNode alloc] init];
-    //
-    //        imageNode.backgroundColor = [UIColor lightGrayColor];
-    //
-    //        imageNode.URL = [NSURL URLWithString:[self.dataSource imageGallery:self urlForImageAtIndex:i]];
-    //
-    //        self.imageNodes[i] = imageNode;
-    //    }
-    
     for (int i = 0; i < numberOfImages; i++) {
+//        ASNetworkImageNode *imageNode = [[ASNetworkImageNode alloc] init];
+//        imageNode.backgroundColor = [UIColor lightGrayColor];
+//        imageNode.URL = [NSURL URLWithString:[self.dataSource imageGallery:self urlForImageAtIndex:i]];
+//        self.imageNodes[i] = imageNode;
+        
         ASDisplayNode *node = [[ASDisplayNode alloc] init];
         node.frame = CGRectMake(self.bounds.origin.x + (50 * i) + 10,
                                 self.bounds.origin.y,
@@ -92,6 +96,9 @@
         number.text = [NSString stringWithFormat:@"%d", i+1];
         number.backgroundColor = [UIColor whiteColor];
         number.textAlignment = NSTextAlignmentCenter;
+        number.textColor = [UIColor lightGrayColor];
+        number.layer.borderWidth = 1;
+        number.layer.borderColor = [UIColor darkGrayColor].CGColor;
         
         [node.view addSubview:number];
         
@@ -118,6 +125,8 @@
     
     return dict;
 }
+
+#pragma mark Animation Handling
 
 - (void)removeAnimationsFromNodes;
 {
@@ -188,9 +197,7 @@
             } else {
                 [self addDecayAnimationToAllSubviewsWithVelocity:[pan velocityInView:self.view].x];
             }
-
             break;
-            
         default:
             break;
     }

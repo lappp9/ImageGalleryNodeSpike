@@ -42,8 +42,7 @@
             [color set];
             UIRectFill(stripe);
         }
-    }else
-    {
+    } else {
         CGFloat stripeHeight = roundf(bounds.size.height / (float)colors.count);
         
         // draw the stripes

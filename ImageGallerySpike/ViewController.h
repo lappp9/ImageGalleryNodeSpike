@@ -3,7 +3,7 @@
 #import "ImageGalleryNode.h"
 #import "RainbowNode.h"
 
-@interface ViewController : UIViewController<ImageGalleryDatasource>
+@interface ViewController : UIViewController<ImageGalleryDatasource, ImageGalleryDelegate>
 
 @end
 
