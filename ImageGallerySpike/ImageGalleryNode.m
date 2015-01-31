@@ -4,14 +4,13 @@
 #import <AsyncDisplayKit.h>
 
 @interface ImageGalleryNode ()
-
 @property (nonatomic) NSMutableArray *imageNodes;
 @property (nonatomic) CGFloat touchXPosition;
 @property (nonatomic) CGFloat newX;
 @property (nonatomic) CGFloat difference;
 @property (nonatomic) NSMutableArray *initialCenters;
 @property (nonatomic) NSMutableArray *finalCenters;
-
+@property (nonatomic) CGFloat kSubViewWidth;
 @end
 
 @implementation ImageGalleryNode
@@ -70,7 +69,14 @@
         decay.velocity = [NSValue valueWithCGPoint:CGPointMake(xVelocity, 0)];
         decay.delegate = self;
         
-        [node.view pop_addAnimation:decay forKey:@"scroll"];
+        if ([self.imageNodes indexOfObject:node] == 0) {
+            [node.view pop_addAnimation:decay forKey:@"firstNodeScroll"];
+        } else if ([self.imageNodes indexOfObject:node] == self.imageNodes.count - 1) {
+            [node.view pop_addAnimation:decay forKey:@"lastNodeScroll"];
+        } else {
+            [node.view pop_addAnimation:decay forKey:@"scroll"];
+        }
+        
     }
 }
 
@@ -111,17 +117,21 @@
 
 - (void)pop_animationDidApply:(POPAnimation *)anim;
 {
-    //this catches the first node going too far after it has already animated one time too many
-    //maybe set some static int that's one less than the count of the images
-    //then call animateviewsbacktostartingposition after that static int has reached the count, then reset the int for next time
-    //hacky? perhaps
     if (((ASDisplayNode *)self.imageNodes[0]).frame.origin.x > 50) {
-        [self removeAnimationsFromNodes];
-        [self animateViewsBackToStartingPosition];
+        POPAnimation *lastDecay = [((ASDisplayNode *)self.imageNodes.lastObject).view pop_animationForKey:@"lastNodeScroll"];
+        
+        if ([anim isEqual:lastDecay]) {
+            [self removeAnimationsFromNodes];
+            [self animateViewsBackToStartingPosition];
+        }
     }
     if (((ASDisplayNode *)self.imageNodes[self.imageNodes.count-1]).frame.origin.x < 130) {
-        [self removeAnimationsFromNodes];
-        [self animateViewsBackToEndingPosition];
+        POPAnimation *lastDecay = [((ASDisplayNode *)self.imageNodes.lastObject).view pop_animationForKey:@"lastNodeScroll"];
+        
+        if ([anim isEqual:lastDecay]) {
+            [self removeAnimationsFromNodes];
+            [self animateViewsBackToEndingPosition];
+        }
     }
 }
 
@@ -162,6 +172,7 @@
     self.imageNodes = @[].mutableCopy;
     self.initialCenters = @[].mutableCopy;
     self.finalCenters = @[].mutableCopy;
+    _kSubViewWidth = self.bounds.size.width/2.5;
     
     UIPanGestureRecognizer *pan = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(galleryDidPan:)];
     
@@ -215,15 +226,57 @@
         //works for 3, who cares, make it work for any number
         //it is 3 am though... so maybe tomorrow
         
-        CGFloat newXCenter = node.view.center.x - ((node.view.bounds.size.width / 2) * ([self.dataSource numberOfImagesInImageGallery:self] - 2)) -10;
-//
-        self.finalCenters[i] = [NSValue valueWithCGPoint:
-                                CGPointMake(newXCenter, node.view.center.y)
-                                ];
-        
+        ///////REPLACE THIS!!///////////
+//        CGFloat newXCenter = node.view.center.x - ((node.view.bounds.size.width / 2) * ([self.dataSource numberOfImagesInImageGallery:self] - 2)) -10;
+//        self.finalCenters[i] = [NSValue valueWithCGPoint:CGPointMake(newXCenter, node.view.center.y)];
+        ///////REPLACE THIS!!///////////
+
+
         [self.view addSubview:node.view];
     }
+    [self calcualteFinalCenters];
 
+
+}
+
+- (void)calcualteFinalCenters;
+{
+    //each subview takes a certain amount
+    
+    //the last subviews center will be half of one subviews width away
+//    int j = 0;
+//    for (int i = ((int)([self.dataSource numberOfImagesInImageGallery:self] - 1)); i >= 0; i--) {
+//        CGFloat distanceFromRightSide = self.view.bounds.size.width - (self.kSubViewWidth/2);
+//        CGFloat amountToSubtract = 0;
+//        if (j != 0) {
+//            amountToSubtract = (j * _kSubViewWidth) - 50;
+//        }
+//        j++;
+//        
+//        CGPoint finalCenter = CGPointMake(distanceFromRightSide - amountToSubtract, 120);
+//        
+//        self.finalCenters[i] = [NSValue valueWithCGPoint:finalCenter];
+//    }
+    
+    for (int i = 0; i <[self.dataSource numberOfImagesInImageGallery:self]; i++) {
+        
+        CGFloat distanceFromRightSide = 0;
+        if (i == 0) {
+            distanceFromRightSide = self.view.bounds.size.width - (self.kSubViewWidth/2);
+        } else {
+            distanceFromRightSide = self.view.bounds.size.width - (self.kSubViewWidth/2);
+            distanceFromRightSide -= ((i * _kSubViewWidth) + (4 * i));
+        }
+
+        CGPoint finalCenter = CGPointMake(distanceFromRightSide, 120);
+
+        [self.finalCenters addObject:[NSValue valueWithCGPoint:finalCenter]];
+        
+    }
+    
+    self.finalCenters = [[self.finalCenters reverseObjectEnumerator] allObjects].mutableCopy;
+
+    //each other subview's center will be a full subviews width to the right
 }
 
 //- (void)moveAllImageNodesHorizontallyByDifference;

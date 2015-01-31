@@ -32,6 +32,11 @@
 
 }
 
+-(BOOL)shouldAutorotate;
+{
+    return NO;
+}
+
 - (NSString *)imageGallery:(ImageGalleryNode *)imageGallery urlForImageAtIndex:(NSInteger)index;
 {
     CGFloat rand1 = arc4random_uniform(255) + 200;
@@ -41,7 +46,7 @@
 
 -(NSInteger)numberOfImagesInImageGallery:(ImageGalleryNode *)imageGallery;
 {
-    return 3;
+    return 10;
 }
 
 - (BOOL)prefersStatusBarHidden;
