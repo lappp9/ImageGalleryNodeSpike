@@ -14,6 +14,9 @@
 		AECC98781A7C05B3009D867E /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AECC98771A7C05B3009D867E /* Images.xcassets */; };
 		AECC987B1A7C05B3009D867E /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = AECC98791A7C05B3009D867E /* LaunchScreen.xib */; };
 		AECC98871A7C05B3009D867E /* ImageGallerySpikeTests.m in Sources */ = {isa = PBXBuildFile; fileRef = AECC98861A7C05B3009D867E /* ImageGallerySpikeTests.m */; };
+		AECC98951A7C346D009D867E /* ImageGalleryNode.m in Sources */ = {isa = PBXBuildFile; fileRef = AECC98941A7C346D009D867E /* ImageGalleryNode.m */; };
+		AECC98981A7C3503009D867E /* RainbowNode.m in Sources */ = {isa = PBXBuildFile; fileRef = AECC98971A7C3503009D867E /* RainbowNode.m */; };
+		D5417202A164E6F0C24AAD25 /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CFBFDF3500CE0579F826CD72 /* libPods.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -27,6 +30,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		2683013D4864234F0210038F /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
+		32BED178AA40697B2E144DAA /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
 		AECC98671A7C05B3009D867E /* ImageGallerySpike.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ImageGallerySpike.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AECC986B1A7C05B3009D867E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AECC986C1A7C05B3009D867E /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -40,6 +45,11 @@
 		AECC98801A7C05B3009D867E /* ImageGallerySpikeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ImageGallerySpikeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		AECC98851A7C05B3009D867E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AECC98861A7C05B3009D867E /* ImageGallerySpikeTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ImageGallerySpikeTests.m; sourceTree = "<group>"; };
+		AECC98931A7C346D009D867E /* ImageGalleryNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ImageGalleryNode.h; sourceTree = "<group>"; };
+		AECC98941A7C346D009D867E /* ImageGalleryNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ImageGalleryNode.m; sourceTree = "<group>"; };
+		AECC98961A7C3503009D867E /* RainbowNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RainbowNode.h; sourceTree = "<group>"; };
+		AECC98971A7C3503009D867E /* RainbowNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RainbowNode.m; sourceTree = "<group>"; };
+		CFBFDF3500CE0579F826CD72 /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -47,6 +57,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D5417202A164E6F0C24AAD25 /* libPods.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -60,12 +71,31 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		1DDF44B9E126E1BE6A02F619 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				32BED178AA40697B2E144DAA /* Pods.debug.xcconfig */,
+				2683013D4864234F0210038F /* Pods.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
+		2A81F34A26784D05B320CD39 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				CFBFDF3500CE0579F826CD72 /* libPods.a */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		AECC985E1A7C05B3009D867E = {
 			isa = PBXGroup;
 			children = (
 				AECC98691A7C05B3009D867E /* ImageGallerySpike */,
 				AECC98831A7C05B3009D867E /* ImageGallerySpikeTests */,
 				AECC98681A7C05B3009D867E /* Products */,
+				1DDF44B9E126E1BE6A02F619 /* Pods */,
+				2A81F34A26784D05B320CD39 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -85,10 +115,14 @@
 				AECC986F1A7C05B3009D867E /* AppDelegate.m */,
 				AECC98711A7C05B3009D867E /* ViewController.h */,
 				AECC98721A7C05B3009D867E /* ViewController.m */,
+				AECC98931A7C346D009D867E /* ImageGalleryNode.h */,
+				AECC98941A7C346D009D867E /* ImageGalleryNode.m */,
 				AECC98741A7C05B3009D867E /* Main.storyboard */,
 				AECC98771A7C05B3009D867E /* Images.xcassets */,
 				AECC98791A7C05B3009D867E /* LaunchScreen.xib */,
 				AECC986A1A7C05B3009D867E /* Supporting Files */,
+				AECC98961A7C3503009D867E /* RainbowNode.h */,
+				AECC98971A7C3503009D867E /* RainbowNode.m */,
 			);
 			path = ImageGallerySpike;
 			sourceTree = "<group>";
@@ -126,9 +160,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = AECC988A1A7C05B3009D867E /* Build configuration list for PBXNativeTarget "ImageGallerySpike" */;
 			buildPhases = (
+				5B5FF2D412AB905426B64CD6 /* Check Pods Manifest.lock */,
 				AECC98631A7C05B3009D867E /* Sources */,
 				AECC98641A7C05B3009D867E /* Frameworks */,
 				AECC98651A7C05B3009D867E /* Resources */,
+				8DA07268B83917BE85FAB421 /* Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -214,11 +250,46 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		5B5FF2D412AB905426B64CD6 /* Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		8DA07268B83917BE85FAB421 /* Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods/Pods-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		AECC98631A7C05B3009D867E /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AECC98981A7C3503009D867E /* RainbowNode.m in Sources */,
+				AECC98951A7C346D009D867E /* ImageGalleryNode.m in Sources */,
 				AECC98731A7C05B3009D867E /* ViewController.m in Sources */,
 				AECC98701A7C05B3009D867E /* AppDelegate.m in Sources */,
 				AECC986D1A7C05B3009D867E /* main.m in Sources */,
@@ -341,6 +412,7 @@
 		};
 		AECC988B1A7C05B3009D867E /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 32BED178AA40697B2E144DAA /* Pods.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = ImageGallerySpike/Info.plist;
@@ -351,6 +423,7 @@
 		};
 		AECC988C1A7C05B3009D867E /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 2683013D4864234F0210038F /* Pods.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = ImageGallerySpike/Info.plist;
@@ -412,6 +485,7 @@
 				AECC988C1A7C05B3009D867E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		AECC988D1A7C05B3009D867E /* Build configuration list for PBXNativeTarget "ImageGallerySpikeTests" */ = {
 			isa = XCConfigurationList;
@@ -420,6 +494,7 @@
 				AECC988F1A7C05B3009D867E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

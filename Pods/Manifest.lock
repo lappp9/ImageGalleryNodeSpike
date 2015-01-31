@@ -1,0 +1,41 @@
+PODS:
+  - AFNetworking (2.5.0):
+    - AFNetworking/NSURLConnection (= 2.5.0)
+    - AFNetworking/NSURLSession (= 2.5.0)
+    - AFNetworking/Reachability (= 2.5.0)
+    - AFNetworking/Security (= 2.5.0)
+    - AFNetworking/Serialization (= 2.5.0)
+    - AFNetworking/UIKit (= 2.5.0)
+  - AFNetworking/NSURLConnection (2.5.0):
+    - AFNetworking/Reachability
+    - AFNetworking/Security
+    - AFNetworking/Serialization
+  - AFNetworking/NSURLSession (2.5.0):
+    - AFNetworking/Reachability
+    - AFNetworking/Security
+    - AFNetworking/Serialization
+  - AFNetworking/Reachability (2.5.0)
+  - AFNetworking/Security (2.5.0)
+  - AFNetworking/Serialization (2.5.0)
+  - AFNetworking/UIKit (2.5.0):
+    - AFNetworking/NSURLConnection
+    - AFNetworking/NSURLSession
+  - AsyncDisplayKit (1.1.1):
+    - AsyncDisplayKit/ASDealloc2MainObject (= 1.1.1)
+  - AsyncDisplayKit/ASDealloc2MainObject (1.1.1)
+  - pop (1.0.7)
+  - Shimmer (1.0.2)
+
+DEPENDENCIES:
+  - AFNetworking (~> 2.4)
+  - AsyncDisplayKit
+  - pop (~> 1.0)
+  - Shimmer (~> 1.0)
+
+SPEC CHECKSUMS:
+  AFNetworking: 0f54cb5d16ce38c1b76948faffb8d5fb705021c7
+  AsyncDisplayKit: 897b28140c6c73fbe8d6168f19ce7cbd87c94ee8
+  pop: 2f14a1ea61339767af9e66741b418c831b3844df
+  Shimmer: 057fcfe9c1c978d69d50b64fce93a61080cd08ec
+
+COCOAPODS: 0.35.0
