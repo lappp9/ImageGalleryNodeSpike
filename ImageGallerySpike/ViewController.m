@@ -41,7 +41,7 @@
 
 -(NSInteger)numberOfImagesInImageGallery:(ImageGalleryNode *)imageGallery;
 {
-    return 10;
+    return 3;
 }
 
 - (BOOL)prefersStatusBarHidden;

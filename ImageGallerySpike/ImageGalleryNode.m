@@ -212,11 +212,14 @@
         
         //this doesnt work so figure out a way to calculate the ending centers!!!!
         
-//        CGFloat newXCenter = node.view.center.x - ((node.view.bounds.size.width / 2) * ([self.dataSource numberOfImagesInImageGallery:self] - 2)) -10;
+        //works for 3, who cares, make it work for any number
+        //it is 3 am though... so maybe tomorrow
+        
+        CGFloat newXCenter = node.view.center.x - ((node.view.bounds.size.width / 2) * ([self.dataSource numberOfImagesInImageGallery:self] - 2)) -10;
 //
-//        self.finalCenters[i] = [NSValue valueWithCGPoint:
-//                                CGPointMake(newXCenter, node.view.center.y)
-//                                ];
+        self.finalCenters[i] = [NSValue valueWithCGPoint:
+                                CGPointMake(newXCenter, node.view.center.y)
+                                ];
         
         [self.view addSubview:node.view];
     }
