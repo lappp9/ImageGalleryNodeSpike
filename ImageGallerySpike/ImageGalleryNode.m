@@ -14,12 +14,11 @@
 @implementation ImageGalleryNode
 
 /*
- 
  //TODO:
- 
  
  1) allow swiping up to transfer to full screen
  
+ 2) Make number label better.
  
   */
 
@@ -38,7 +37,6 @@
      isCancelled:(asdisplaynode_iscancelled_block_t)isCancelledBlock
    isRasterizing:(BOOL)isRasterizing
 {
-    //FOURTH
     if (!isRasterizing) {
         [[UIColor blackColor] set];
         UIRectFill(bounds);
@@ -87,18 +85,45 @@
     [self calcualteFinalCenters];
 }
 
+- (void)calcualteFinalCenters;
+{
+    for (int i = 0; i <[self.dataSource numberOfImagesInImageGallery:self]; i++) {
+        
+        CGFloat distanceFromRightSide = 0;
+        if (i == 0) {
+            distanceFromRightSide = self.view.bounds.size.width - (self.kSubViewWidth/2);
+        } else {
+            distanceFromRightSide = self.view.bounds.size.width - (self.kSubViewWidth/2);
+            distanceFromRightSide -= ((i * _kSubViewWidth) + (4 * i));
+        }
+        
+        CGPoint finalCenter = CGPointMake(distanceFromRightSide, 120);
+        
+        [self.finalCenters addObject:[NSValue valueWithCGPoint:finalCenter]];
+    }
+    
+    self.finalCenters = [[self.finalCenters reverseObjectEnumerator] allObjects].mutableCopy;
+}
+
 - (void)addPositionLabelToImageNode:(ASDisplayNode *)imageNode;
 {
-    NSUInteger i = [self.imageNodes indexOfObject:imageNode];
-
-    UILabel *number = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 51, 51)];
-    number.text = [NSString stringWithFormat:@"%ld", i+1];
-    number.backgroundColor = [UIColor whiteColor];
-    number.textAlignment = NSTextAlignmentCenter;
-    number.textColor = [UIColor lightGrayColor];
-    number.layer.borderWidth = 1;
-    number.layer.borderColor = [UIColor darkGrayColor].CGColor;
+    ASDisplayNode *labelBackground = [[ASDisplayNode alloc] init];
+    labelBackground.frame = CGRectMake(0, 0, 60, 20);
+    labelBackground.layer.borderWidth = 1;
+    labelBackground.layer.borderColor = [UIColor whiteColor].CGColor;
+    labelBackground.backgroundColor = [UIColor darkGrayColor];
+    labelBackground.alpha = 0.5;
     
+    NSString *labelString = [NSString stringWithFormat:@"%ld of %ld", [self.imageNodes indexOfObject:imageNode]+1, self.imageNodes.count];
+    UILabel *number = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 60, 20)];
+    number.text = labelString;
+    number.backgroundColor = [UIColor clearColor];
+    number.textAlignment = NSTextAlignmentCenter;
+    number.textColor = [UIColor whiteColor];
+    number.font = [UIFont fontWithName:@"HelveticaNeue-Italic" size:14];
+    number.layer.borderColor = [UIColor darkGrayColor].CGColor;
+
+    [imageNode.view addSubview:labelBackground.view];
     [imageNode.view addSubview:number];
 }
 
@@ -228,27 +253,6 @@
         anim.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut];
         [node.view pop_addAnimation:anim forKey:nil];
     }
-}
-
-- (void)calcualteFinalCenters;
-{
-    for (int i = 0; i <[self.dataSource numberOfImagesInImageGallery:self]; i++) {
-        
-        CGFloat distanceFromRightSide = 0;
-        if (i == 0) {
-            distanceFromRightSide = self.view.bounds.size.width - (self.kSubViewWidth/2);
-        } else {
-            distanceFromRightSide = self.view.bounds.size.width - (self.kSubViewWidth/2);
-            distanceFromRightSide -= ((i * _kSubViewWidth) + (4 * i));
-        }
-
-        CGPoint finalCenter = CGPointMake(distanceFromRightSide, 120);
-
-        [self.finalCenters addObject:[NSValue valueWithCGPoint:finalCenter]];
-        
-    }
-    
-    self.finalCenters = [[self.finalCenters reverseObjectEnumerator] allObjects].mutableCopy;
 }
 
 @end

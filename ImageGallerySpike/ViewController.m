@@ -5,15 +5,12 @@
 
 @property (nonatomic) ImageGalleryNode *imageGallery;
 @property (nonatomic) RainbowNode *rainbow;
-@property (weak, nonatomic) IBOutlet UIButton *tapMeButton;
-
 @end
 
 @implementation ViewController
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    // Do any additional setup after loading the view.
     
     self.edgesForExtendedLayout = UIRectEdgeNone;
     
@@ -27,7 +24,7 @@
     [self.view addSubview:imageGallery.view];
 }
 
--(BOOL)shouldAutorotate;
+- (BOOL)shouldAutorotate;
 {
     return NO;
 }
@@ -39,8 +36,6 @@
     CGFloat rand1 = arc4random_uniform(200) + 200;
     CGFloat rand2 = arc4random_uniform(200) + 200;
     NSURL *kittenURL = [NSURL URLWithString:[NSString stringWithFormat:@"http://placekitten.com/%i/%i", (int)rand1, (int)rand2]];
-    
-    
     
     return kittenURL;
 }
@@ -54,7 +49,7 @@
 
 - (BOOL)imageGalleryShouldDisplayPositions;
 {
-    return true;
+    return YES;
 }
 
 
