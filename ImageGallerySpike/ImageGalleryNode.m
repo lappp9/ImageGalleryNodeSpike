@@ -100,10 +100,10 @@
         [self addPositionLabelsToImageNodes];
     }
     
-    [self calcualteFinalCenters];
+    [self calculateFinalCenters];
 }
 
-- (void)calcualteFinalCenters;
+- (void)calculateFinalCenters;
 {
     for (int i = 0; i < [self.dataSource numberOfImagesInImageGallery:self]; i++) {
         
