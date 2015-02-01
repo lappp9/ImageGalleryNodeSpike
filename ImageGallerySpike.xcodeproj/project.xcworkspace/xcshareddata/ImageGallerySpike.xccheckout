@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>2B002A1A-5AD7-4EF4-A38A-C9205785B014</string>
+	<key>IDESourceControlProjectName</key>
+	<string>ImageGallerySpike</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>AF706CF11E6BB3628E5F992AD8A8F6A4025D5F12</key>
+		<string>github.com:lappp9/ImageGalleryNodeSpike.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>ImageGallerySpike.xcodeproj</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>AF706CF11E6BB3628E5F992AD8A8F6A4025D5F12</key>
+		<string>../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>github.com:lappp9/ImageGalleryNodeSpike.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>111</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>AF706CF11E6BB3628E5F992AD8A8F6A4025D5F12</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>AF706CF11E6BB3628E5F992AD8A8F6A4025D5F12</string>
+			<key>IDESourceControlWCCName</key>
+			<string>ImageGallerySpike</string>
+		</dict>
+	</array>
+</dict>
+</plist>

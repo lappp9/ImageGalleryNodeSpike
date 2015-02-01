@@ -4,11 +4,27 @@
 @interface ImageGalleryNode ()<_ASDisplayLayerDelegate, POPAnimationDelegate>
 @property (nonatomic) NSMutableArray *imageNodes;
 @property (nonatomic) CGFloat touchXPosition;
+@property (nonatomic) CGFloat touchYPosition;
 @property (nonatomic) CGFloat newX;
+@property (nonatomic) CGFloat newY;
 @property (nonatomic) CGFloat difference;
+@property (nonatomic) CGFloat kSubViewWidth;
+
+//when hitting an edge, you can just animte all the views back to their initial or ending places
 @property (nonatomic) NSMutableArray *initialCenters;
 @property (nonatomic) NSMutableArray *finalCenters;
-@property (nonatomic) CGFloat kSubViewWidth;
+
+//tracking the state of the subviews
+@property (nonatomic) BOOL isPanningVertically;
+@property (nonatomic) BOOL isFullScreen;
+@property (nonatomic) CGRect fullScreenFrame;
+@property (nonatomic) ASDisplayNode *touchedNode;
+
+// after the pan upward has stopped
+// animate all views sizes to full screen
+// figure out how far the view you touched is from the center and animate all views that many points in that direction
+
+//do i need to keep arrays of all the frames?
 @end
 
 @implementation ImageGalleryNode
@@ -18,17 +34,9 @@
  
  1) allow swiping up to transfer to full screen
  
- 2) Make number label better.
- 
-  */
+    -- check where the touch lands and make sure that's the view that animates to the center of the screen
 
-//-drawParametersForAsyncLayer:
-// this should return a dictionary that configures this view
-// just get teh config stuff from the datasource and then pass it along! i think...
-//right now the time at which to stop the scrolling is hardcoded to like > 50 or < 110
-//in the future do 50 and the windows width - the image's width - 20 or something
-
-// move drawing code into drawRect and move all the gesture stuff into didlayoutsubviews or something
+*/
 
 #pragma mark View Drawing
 
@@ -43,6 +51,15 @@
     }
 }
 
+- (NSObject *)drawParametersForAsyncLayer:(_ASDisplayLayer *)layer;
+{
+    // this should return a dictionary that configures this view
+    // just get teh config stuff from the datasource and then pass it along! i think...
+    // move drawing code into drawRect and move all the gesture stuff into didlayoutsubviews or something
+    NSMutableDictionary *dict = @{}.mutableCopy;
+    return dict;
+}
+
 - (void)layout;
 {
     [super layout];
@@ -55,6 +72,7 @@
     self.initialCenters = @[].mutableCopy;
     self.finalCenters = @[].mutableCopy;
     _kSubViewWidth = self.bounds.size.width/2.5;
+    _fullScreenFrame = CGRectMake(0, 0, self.bounds.size.width, self.bounds.size.height);
     
     UIPanGestureRecognizer *pan = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(galleryDidPan:)];
     
@@ -87,7 +105,7 @@
 
 - (void)calcualteFinalCenters;
 {
-    for (int i = 0; i <[self.dataSource numberOfImagesInImageGallery:self]; i++) {
+    for (int i = 0; i < [self.dataSource numberOfImagesInImageGallery:self]; i++) {
         
         CGFloat distanceFromRightSide = 0;
         if (i == 0) {
@@ -97,7 +115,7 @@
             distanceFromRightSide -= ((i * _kSubViewWidth) + (4 * i));
         }
         
-        CGPoint finalCenter = CGPointMake(distanceFromRightSide, 120);
+        CGPoint finalCenter = CGPointMake(distanceFromRightSide, self.view.bounds.size.height/2);
         
         [self.finalCenters addObject:[NSValue valueWithCGPoint:finalCenter]];
     }
@@ -125,12 +143,6 @@
 
     [imageNode.view addSubview:labelBackground.view];
     [imageNode.view addSubview:number];
-}
-
-- (NSObject *)drawParametersForAsyncLayer:(_ASDisplayLayer *)layer;
-{
-    NSMutableDictionary *dict = @{}.mutableCopy;
-    return dict;
 }
 
 #pragma mark Animation Handling
@@ -177,24 +189,56 @@
     }
 }
 
--(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event;
+- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event;
 {
     [self removeAnimationsFromNodes];
 }
 
 - (void)galleryDidPan:(UIPanGestureRecognizer *)pan;
 {
+    CGPoint vel = [pan velocityInView:self.view];
+    
     switch (pan.state) {
         case UIGestureRecognizerStateBegan:
+            //set up the bool values for what direction this pan is going
+            if (abs(vel.y) > abs(vel.x)){
+                _isPanningVertically = YES;
+                if (vel.y > 0) {
+                    NSLog(@"DOWN!! at %f velocity", vel.y);
+                } else {
+                    NSLog(@"UP!! at %f velocity", vel.y);
+                }
+            } else {
+                _isPanningVertically = NO;
+                if (vel.x > 0) {
+                    NSLog(@"RIGHT!! at %f velocity", vel.y);
+                } else {
+                    NSLog(@"LEFT!! at %f velocity", vel.y);
+                }
+            }
             self.touchXPosition = [pan locationInView:self.view].x;
             break;
         case UIGestureRecognizerStateChanged:
+            
+            //when you're panning vertically
+                //the chnages in y position should translate to a chnage in the scale of all the cards
+                //the changes in x position should translate to the centers of the all the cards shifting horizontally
+            
+            //when you're panning horizontally
+                //the changes in x position should translate to the centers of the all the cards shifting horizontally
+            
             _newX = [pan locationInView:self.view].x;
             _difference = _newX - _touchXPosition;
             [self moveAllNodesHorizontallyByDifference];
             _touchXPosition = _newX;
             break;
         case UIGestureRecognizerStateEnded:
+            //when you were panning vertically,
+                //if isFullscreen is YES then change it to NO and animate back to the small screen
+                //if isFullscreen is NO then change it to YES and animate the card you touched on the initial pan to be the full screen view
+            
+            
+            //when you were panning horizontally, add a decay animation to scroll and make sure to watch out for the edges
             if (((ASDisplayNode *)self.imageNodes[0]).frame.origin.x > 1) {
                 [self animateViewsBackToStartingPosition];
             } else if (((ASDisplayNode *)self.imageNodes[self.imageNodes.count-1]).frame.origin.x < 130) {

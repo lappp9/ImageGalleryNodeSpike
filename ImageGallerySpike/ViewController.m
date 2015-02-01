@@ -17,9 +17,10 @@
     CGFloat galleryWidth = self.view.bounds.size.width;
 
     ImageGalleryNode *imageGallery = [[ImageGalleryNode alloc] init];
-    imageGallery.frame = CGRectMake(0, self.view.bounds.size.height - 240, galleryWidth, 240);
+    imageGallery.frame = CGRectMake(8, 8, galleryWidth - 16, 300);
     imageGallery.dataSource = self;
     imageGallery.delegate = self;
+    imageGallery.clipsToBounds = YES;
 
     [self.view addSubview:imageGallery.view];
 }
@@ -51,7 +52,6 @@
 {
     return YES;
 }
-
 
 - (BOOL)prefersStatusBarHidden;
 {
