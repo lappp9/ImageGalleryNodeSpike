@@ -8,7 +8,6 @@
 @property (nonatomic) CGFloat newX;
 @property (nonatomic) CGFloat newY;
 @property (nonatomic) CGFloat difference;
-@property (nonatomic) CGFloat kSubViewWidth;
 
 //when hitting an edge, you can just animte all the views back to their initial or ending places
 @property (nonatomic) NSMutableArray *initialCenters;
@@ -71,8 +70,9 @@
     self.imageNodes = @[].mutableCopy;
     self.initialCenters = @[].mutableCopy;
     self.finalCenters = @[].mutableCopy;
-    _kSubViewWidth = self.bounds.size.width/2.5;
     _fullScreenFrame = CGRectMake(0, 0, self.bounds.size.width, self.bounds.size.height);
+    
+    self.clipsToBounds = YES;
     
     UIPanGestureRecognizer *pan = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(galleryDidPan:)];
     
@@ -81,7 +81,8 @@
     NSInteger numberOfImages = [self.dataSource numberOfImagesInImageGallery:self];
     
     for (int i = 0; i < numberOfImages; i++) {
-        CGFloat imageNodeWidth = self.bounds.size.width/2.5;
+//        CGFloat imageNodeWidth = self.bounds.size.width/2.5;
+        CGFloat imageNodeWidth = [self.dataSource widthForImages];
         CGFloat imageNodeHeight = self.bounds.size.height;
         
         ASNetworkImageNode *imageNode = [[ASNetworkImageNode alloc] init];
@@ -91,13 +92,13 @@
         imageNode.URL = [self.dataSource imageGallery:self urlForImageAtIndex:i];
         imageNode.frame = CGRectMake(((i * imageNodeWidth) + (i * 4)), 0, imageNodeWidth, imageNodeHeight);
         imageNode.cornerRadius = 4;
-        
-        if ([self.delegate imageGalleryShouldDisplayPositions]) {
-            [self addPositionLabelToImageNode:imageNode];
-        }
     
         self.initialCenters[i] = [NSValue valueWithCGPoint:imageNode.view.center];
         [self.view addSubview:imageNode.view];
+    }
+    
+    if ([self.delegate imageGalleryShouldDisplayPositions]) {
+        [self addPositionLabelsToImageNodes];
     }
     
     [self calcualteFinalCenters];
@@ -109,10 +110,10 @@
         
         CGFloat distanceFromRightSide = 0;
         if (i == 0) {
-            distanceFromRightSide = self.view.bounds.size.width - (self.kSubViewWidth/2);
+            distanceFromRightSide = self.view.bounds.size.width - ([self.dataSource widthForImages]/2);
         } else {
-            distanceFromRightSide = self.view.bounds.size.width - (self.kSubViewWidth/2);
-            distanceFromRightSide -= ((i * _kSubViewWidth) + (4 * i));
+            distanceFromRightSide = self.view.bounds.size.width - ([self.dataSource widthForImages]/2);
+            distanceFromRightSide -= ((i * [self.dataSource widthForImages]) + (4 * i));
         }
         
         CGPoint finalCenter = CGPointMake(distanceFromRightSide, self.view.bounds.size.height/2);
@@ -123,26 +124,28 @@
     self.finalCenters = [[self.finalCenters reverseObjectEnumerator] allObjects].mutableCopy;
 }
 
-- (void)addPositionLabelToImageNode:(ASDisplayNode *)imageNode;
+- (void)addPositionLabelsToImageNodes;
 {
-    ASDisplayNode *labelBackground = [[ASDisplayNode alloc] init];
-    labelBackground.frame = CGRectMake(0, 0, 60, 20);
-    labelBackground.layer.borderWidth = 1;
-    labelBackground.layer.borderColor = [UIColor whiteColor].CGColor;
-    labelBackground.backgroundColor = [UIColor darkGrayColor];
-    labelBackground.alpha = 0.5;
-    
-    NSString *labelString = [NSString stringWithFormat:@"%ld of %ld", [self.imageNodes indexOfObject:imageNode]+1, self.imageNodes.count];
-    UILabel *number = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 60, 20)];
-    number.text = labelString;
-    number.backgroundColor = [UIColor clearColor];
-    number.textAlignment = NSTextAlignmentCenter;
-    number.textColor = [UIColor whiteColor];
-    number.font = [UIFont fontWithName:@"HelveticaNeue-Italic" size:14];
-    number.layer.borderColor = [UIColor darkGrayColor].CGColor;
-
-    [imageNode.view addSubview:labelBackground.view];
-    [imageNode.view addSubview:number];
+    for (ASDisplayNode *imageNode in self.imageNodes) {
+        ASDisplayNode *labelBackground = [[ASDisplayNode alloc] init];
+        labelBackground.frame = CGRectMake(0, 0, 60, 20);
+        labelBackground.layer.borderWidth = 1;
+        labelBackground.layer.borderColor = [UIColor whiteColor].CGColor;
+        labelBackground.backgroundColor = [UIColor darkGrayColor];
+        labelBackground.alpha = 0.5;
+        
+        NSString *labelString = [NSString stringWithFormat:@"%ld of %ld", [self.imageNodes indexOfObject:imageNode]+1, self.imageNodes.count];
+        UILabel *number = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 60, 20)];
+        number.text = labelString;
+        number.backgroundColor = [UIColor clearColor];
+        number.textAlignment = NSTextAlignmentCenter;
+        number.textColor = [UIColor whiteColor];
+        number.font = [UIFont fontWithName:@"HelveticaNeue-Italic" size:14];
+        number.layer.borderColor = [UIColor darkGrayColor].CGColor;
+        
+        [imageNode.view addSubview:labelBackground.view];
+        [imageNode.view addSubview:number];
+    }
 }
 
 #pragma mark Animation Handling
@@ -219,7 +222,6 @@
             self.touchXPosition = [pan locationInView:self.view].x;
             break;
         case UIGestureRecognizerStateChanged:
-            
             //when you're panning vertically
                 //the chnages in y position should translate to a chnage in the scale of all the cards
                 //the changes in x position should translate to the centers of the all the cards shifting horizontally

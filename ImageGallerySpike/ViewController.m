@@ -17,10 +17,10 @@
     CGFloat galleryWidth = self.view.bounds.size.width;
 
     ImageGalleryNode *imageGallery = [[ImageGalleryNode alloc] init];
-    imageGallery.frame = CGRectMake(8, 8, galleryWidth - 16, 300);
+    imageGallery.frame = CGRectMake(8, 8, galleryWidth - 16, 150);
+    imageGallery.cornerRadius = 4;
     imageGallery.dataSource = self;
     imageGallery.delegate = self;
-    imageGallery.clipsToBounds = YES;
 
     [self.view addSubview:imageGallery.view];
 }
@@ -41,9 +41,14 @@
     return kittenURL;
 }
 
--(NSInteger)numberOfImagesInImageGallery:(ImageGalleryNode *)imageGallery;
+- (NSInteger)numberOfImagesInImageGallery:(ImageGalleryNode *)imageGallery;
 {
-    return 20;
+    return 5;
+}
+
+- (CGFloat)widthForImages;
+{
+    return 200;
 }
 
 #pragma mark Image Gallery Delegate

@@ -19,16 +19,12 @@
 
 - (NSInteger)numberOfImagesInImageGallery:(ImageGalleryNode *)imageGallery;
 - (NSURL *)imageGallery:(ImageGalleryNode *)imageGallery urlForImageAtIndex:(NSInteger)index;
+- (CGFloat)widthForImages;
 
 @end
 
 @protocol ImageGalleryDelegate <NSObject>
 
 - (BOOL)imageGalleryShouldDisplayPositions;
-
-@optional
-
-//defaults to 1/3 the screen size
-- (NSInteger)heightForImageGallery;
 
 @end
