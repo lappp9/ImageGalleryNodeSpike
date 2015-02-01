@@ -81,7 +81,6 @@
     NSInteger numberOfImages = [self.dataSource numberOfImagesInImageGallery:self];
     
     for (int i = 0; i < numberOfImages; i++) {
-//        CGFloat imageNodeWidth = self.bounds.size.width/2.5;
         CGFloat imageNodeWidth = [self.dataSource widthForImages];
         CGFloat imageNodeHeight = self.bounds.size.height;
         
@@ -214,9 +213,9 @@
             } else {
                 _isPanningVertically = NO;
                 if (vel.x > 0) {
-                    NSLog(@"RIGHT!! at %f velocity", vel.y);
+                    NSLog(@"RIGHT!! at %f velocity", vel.x);
                 } else {
-                    NSLog(@"LEFT!! at %f velocity", vel.y);
+                    NSLog(@"LEFT!! at %f velocity", vel.x);
                 }
             }
             self.touchXPosition = [pan locationInView:self.view].x;

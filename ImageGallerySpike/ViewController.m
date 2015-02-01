@@ -17,7 +17,7 @@
     CGFloat galleryWidth = self.view.bounds.size.width;
 
     ImageGalleryNode *imageGallery = [[ImageGalleryNode alloc] init];
-    imageGallery.frame = CGRectMake(8, 8, galleryWidth - 16, 150);
+    imageGallery.frame = CGRectMake(8, 8, galleryWidth - 16, 250);
     imageGallery.cornerRadius = 4;
     imageGallery.dataSource = self;
     imageGallery.delegate = self;
@@ -48,7 +48,7 @@
 
 - (CGFloat)widthForImages;
 {
-    return 200;
+    return 140;
 }
 
 #pragma mark Image Gallery Delegate
