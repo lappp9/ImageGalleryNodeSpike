@@ -104,8 +104,11 @@
         imageNode.clipsToBounds = YES;
         imageNode.userInteractionEnabled = YES;
         
-        UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(imageWasTapped:)];
-        [imageNode.view addGestureRecognizer:tap];
+        [imageNode addTarget:self action:@selector(imageTouchedDown:) forControlEvents:ASControlNodeEventTouchDown];
+        
+//        UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(imageWasTapped:)];
+
+//        [imageNode.view addGestureRecognizer:tap];
 
         self.initialCenters[i] = [NSValue valueWithCGPoint:imageNode.view.center];
         [self.view addSubview:imageNode.view];
@@ -118,15 +121,10 @@
     [self calculateFinalCenters];
 }
 
-- (void)imageWasTapped:(UITapGestureRecognizer *)tap;
+- (void)imageTouchedDown:(ASNetworkImageNode *)imageNode;
 {
-    if (_isFullScreen) {
-        //go back to small view
-        _isFullScreen = NO;
-    } else {
-        UIView *imageView = tap.view;
-        [self goIntoFullScreenModeFocusedOnView:imageView];
-        _isFullScreen = YES;
+    if ([[imageNode.view pop_animationKeys] containsObject:@"scroll"]) {
+        [self removeAnimationsFromNodes];
     }
 }
 
@@ -301,6 +299,7 @@
  
     switch (pan.state) {
         case UIGestureRecognizerStateBegan:
+            [self removeAnimationsFromNodes];
             //set up the bool values for what direction this pan is going
             if (abs(vel.y) > abs(vel.x)){
                 _isPanningVertically = YES;
