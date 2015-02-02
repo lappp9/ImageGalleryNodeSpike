@@ -47,12 +47,12 @@
 
 - (NSInteger)numberOfImagesInImageGallery:(ImageGalleryNode *)imageGallery;
 {
-    return 5;
+    return 10;
 }
 
 - (CGFloat)widthForImages;
 {
-    return 250;
+    return 100;
 }
 
 #pragma mark Image Gallery Delegate

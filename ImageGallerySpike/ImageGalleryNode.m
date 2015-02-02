@@ -66,15 +66,6 @@
     }
 }
 
-- (NSObject *)drawParametersForAsyncLayer:(_ASDisplayLayer *)layer;
-{
-    // this should return a dictionary that configures this view
-    // just get teh config stuff from the datasource and then pass it along! i think...
-    // move drawing code into drawRect and move all the gesture stuff into didlayoutsubviews or something
-    NSMutableDictionary *dict = @{}.mutableCopy;
-    return dict;
-}
-
 - (void)layout;
 {
     [super layout];
@@ -105,10 +96,6 @@
         imageNode.userInteractionEnabled = YES;
         
         [imageNode addTarget:self action:@selector(imageTouchedDown:) forControlEvents:ASControlNodeEventTouchDown];
-        
-//        UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(imageWasTapped:)];
-
-//        [imageNode.view addGestureRecognizer:tap];
 
         self.initialCenters[i] = [NSValue valueWithCGPoint:imageNode.view.center];
         [self.view addSubview:imageNode.view];
@@ -246,6 +233,14 @@
     }
 }
 
+-(void)pop_animationDidReachToValue:(POPAnimation *)anim;
+{
+    NSLog(@"\n%@\n",anim);
+    
+    NSLog(@"The last images X origin is %f", ((ASNetworkImageNode *) self.imageNodes.lastObject).frame.origin.x);
+
+}
+
 - (void)moveAllNodesyByDifferenceWithTouchLocation:(CGPoint)touch;
 {
     //Whenever this is called i need to add some animations to chnage the scale and the
@@ -277,11 +272,6 @@
             [node.view pop_addAnimation:decay forKey:@"scroll"];
         }
     }
-}
-
-- (void)pop_animationDidReachToValue:(POPDecayAnimation *)anim;
-{
-
 }
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event;
@@ -348,7 +338,7 @@
             CGFloat rightSide = (self.frame.size.width - ((ASNetworkImageNode *)self.imageNodes[self.imageNodes.count-1]).frame.size.width);
             CGFloat lastX = ((ASDisplayNode *)self.imageNodes[self.imageNodes.count-1]).frame.origin.x;
         
-            NSLog(@"The last images X origin is %f", lastX);
+//            NSLog(@"The last images X origin is %f", lastX);
             //when you were panning horizontally, add a decay animation to scroll and make sure to watch out for the edges
             if (((ASDisplayNode *)self.imageNodes[0]).frame.origin.x > 1) {
                 [self animateViewsBackToStartingPosition];
@@ -369,6 +359,9 @@
 
 - (void)pop_animationDidApply:(POPAnimation *)anim;
 {
+    ASDisplayNode *lastNode = (ASDisplayNode *)self.imageNodes.lastObject;
+    CGFloat sweetSpotXValue = self.frame.size.width - lastNode.frame.size.width;
+    
     if (((ASDisplayNode *)self.imageNodes[0]).frame.origin.x > 50) {
         POPAnimation *lastDecay = [((ASDisplayNode *)self.imageNodes.lastObject).view pop_animationForKey:@"lastNodeScroll"];
         
@@ -377,7 +370,7 @@
             [self animateViewsBackToStartingPosition];
         }
     }
-    if (((ASDisplayNode *)self.imageNodes[self.imageNodes.count-1]).frame.origin.x < 130) {
+    if (((ASDisplayNode *)self.imageNodes.lastObject).frame.origin.x < sweetSpotXValue - 25) {
         POPAnimation *lastDecay = [((ASDisplayNode *)self.imageNodes.lastObject).view pop_animationForKey:@"lastNodeScroll"];
         
         if ([anim isEqual:lastDecay]) {
