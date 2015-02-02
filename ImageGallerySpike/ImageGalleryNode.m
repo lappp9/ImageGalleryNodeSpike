@@ -162,19 +162,6 @@
     [imageView pop_addAnimation:imageSpring forKey:nil];
 }
 
-- (void)focusOnView:(UIView *)view;
-{
-    //calculate the difference between the view's center and the screen center and animate all the views that direction
-    
-}
-
-//- (ASDisplayNode *)imageNodeAtPoint:(CGPoint)point;
-//{
-//    
-//    
-//    return _imageNodes[0];
-//}
-
 - (void)setupInitialState
 {
     self.imageNodes = @[].mutableCopy;
@@ -241,7 +228,11 @@
 
 - (void)moveAllNodesHorizontallyByDifference;
 {
-    if (!(((ASDisplayNode *)self.imageNodes[0]).frame.origin.x > 50 || ((ASDisplayNode *)self.imageNodes[self.imageNodes.count-1]).frame.origin.x < 130)) {
+    ASDisplayNode *firstNode = (ASDisplayNode *)self.imageNodes[0];
+    ASDisplayNode *lastNode = (ASDisplayNode *)self.imageNodes.lastObject;
+    CGFloat sweetSpotXValue = self.frame.size.width - lastNode.frame.size.width;
+    
+    if ( !(firstNode.frame.origin.x > 50 || lastNode.frame.origin.x < sweetSpotXValue) ) {
         for (ASDisplayNode *node in self.imageNodes) {
             CGPoint newCenter = CGPointMake((node.view.center.x + _difference), node.view.center.y);
             node.view.center = newCenter;
@@ -288,6 +279,11 @@
     }
 }
 
+- (void)pop_animationDidReachToValue:(POPDecayAnimation *)anim;
+{
+
+}
+
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event;
 {
     [self removeAnimationsFromNodes];
@@ -308,16 +304,16 @@
 //                _touchYPosition = [pan locationInView:self.view].y;
                 
                 if (vel.y > 0) {
-                    NSLog(@"DOWN!! at %f velocity", vel.y);
+//                    NSLog(@"DOWN!! at %f velocity", vel.y);
                 } else {
-                    NSLog(@"UP!! at %f velocity", vel.y);
+//                    NSLog(@"UP!! at %f velocity", vel.y);
                 }
             } else {
                 _isPanningVertically = NO;
                 if (vel.x > 0) {
-                    NSLog(@"RIGHT!! at %f velocity", vel.x);
+//                    NSLog(@"RIGHT!! at %f velocity", vel.x);
                 } else {
-                    NSLog(@"LEFT!! at %f velocity", vel.x);
+//                    NSLog(@"LEFT!! at %f velocity", vel.x);
                 }
             }
             self.touchXPosition = [pan locationInView:self.view].x;
@@ -349,11 +345,18 @@
                 //if isFullscreen is YES then change it to NO and animate back to the small screen
                 //if isFullscreen is NO then change it to YES and animate the card you touched on the initial pan to be the full screen view
             
-            
+            CGFloat rightSide = (self.frame.size.width - ((ASNetworkImageNode *)self.imageNodes[self.imageNodes.count-1]).frame.size.width);
+            CGFloat lastX = ((ASDisplayNode *)self.imageNodes[self.imageNodes.count-1]).frame.origin.x;
+        
+            NSLog(@"The last images X origin is %f", lastX);
             //when you were panning horizontally, add a decay animation to scroll and make sure to watch out for the edges
             if (((ASDisplayNode *)self.imageNodes[0]).frame.origin.x > 1) {
                 [self animateViewsBackToStartingPosition];
-            } else if (((ASDisplayNode *)self.imageNodes[self.imageNodes.count-1]).frame.origin.x < 130) {
+            } else if (lastX >= 0 && lastX < rightSide + 1) {
+//            } else if (((ASDisplayNode *)self.imageNodes[self.imageNodes.count-1]).frame.origin.x < 130) {
+                
+                // origin.x distance from the right side
+                //if the last image's frame.origin.x is between 0 self.view.width - node.view.width
                 [self animateViewsBackToEndingPosition];
             } else {
                 [self addDecayAnimationToAllSubviewsWithVelocity:[pan velocityInView:self.view].x];
