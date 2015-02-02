@@ -52,7 +52,7 @@
 
 - (CGFloat)widthForImages;
 {
-    return 100;
+    return self.view.bounds.size.width - 16 - 50;
 }
 
 #pragma mark Image Gallery Delegate

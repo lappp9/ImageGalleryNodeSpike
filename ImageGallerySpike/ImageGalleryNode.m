@@ -190,7 +190,7 @@
         labelBackground.backgroundColor = [UIColor darkGrayColor];
         labelBackground.alpha = 0.5;
         
-        NSString *labelString = [NSString stringWithFormat:@"%ld of %ld", [self.imageNodes indexOfObject:imageNode]+1, self.imageNodes.count];
+        NSString *labelString = [NSString stringWithFormat:@"%u of %ld", [self.imageNodes indexOfObject:imageNode]+1, (unsigned long)self.imageNodes.count];
         UILabel *number = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 60, 20)];
         number.text = labelString;
         number.backgroundColor = [UIColor clearColor];
@@ -370,7 +370,7 @@
             [self animateViewsBackToStartingPosition];
         }
     }
-    if (((ASDisplayNode *)self.imageNodes.lastObject).frame.origin.x < sweetSpotXValue - 25) {
+    if (((ASDisplayNode *)self.imageNodes.lastObject).frame.origin.x < sweetSpotXValue - 55) {
         POPAnimation *lastDecay = [((ASDisplayNode *)self.imageNodes.lastObject).view pop_animationForKey:@"lastNodeScroll"];
         
         if ([anim isEqual:lastDecay]) {
