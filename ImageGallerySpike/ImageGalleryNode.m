@@ -13,7 +13,6 @@
 
 //when hitting an edge, you can just animte all the views back to their initial or ending places
 @property (nonatomic) NSMutableArray *initialCenters;
-
 @property (nonatomic) NSMutableArray *finalCenters;
 
 //tracking the state of the subviews
@@ -190,7 +189,7 @@
         labelBackground.backgroundColor = [UIColor darkGrayColor];
         labelBackground.alpha = 0.5;
         
-        NSString *labelString = [NSString stringWithFormat:@"%u of %ld", [self.imageNodes indexOfObject:imageNode]+1, (unsigned long)self.imageNodes.count];
+        NSString *labelString = [NSString stringWithFormat:@"%lu of %lu", [self.imageNodes indexOfObject:imageNode]+1, self.imageNodes.count];
         UILabel *number = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 60, 20)];
         number.text = labelString;
         number.backgroundColor = [UIColor clearColor];
