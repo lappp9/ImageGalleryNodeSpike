@@ -16,16 +16,16 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            shouldBeEnabled = "No"
+            shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ImageGallerySpike/ImageGalleryNode.m"
-            timestampString = "444852762.518953"
+            timestampString = "444858636.771147"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "305"
-            endingLineNumber = "305"
-            landmarkName = "-galleryDidPan:"
+            startingLineNumber = "142"
+            endingLineNumber = "142"
+            landmarkName = "-presentFullScreenImageGalleryStartingAtIndex:"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>

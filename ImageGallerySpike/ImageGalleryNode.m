@@ -1,8 +1,11 @@
 
 #import "ImageGalleryNode.h"
+#import "FullScreenImageGalleryNode.h"
 
-@interface ImageGalleryNode ()<_ASDisplayLayerDelegate, POPAnimationDelegate>
+@interface ImageGalleryNode ()<POPAnimationDelegate, UIGestureRecognizerDelegate>
 @property (nonatomic) NSMutableArray *imageNodes;
+
+@property (nonatomic) FullScreenImageGalleryNode *fullScreenImageGalleryNode;
 
 @property (nonatomic) CGFloat touchXPosition;
 @property (nonatomic) CGFloat touchYPosition;
@@ -80,9 +83,7 @@
     
     [self setupInitialState];
     
-    UIPanGestureRecognizer *pan = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(galleryDidPan:)];
 
-    [self.view addGestureRecognizer:pan];
 
     NSInteger numberOfImages = [self.dataSource numberOfImagesInImageGallery:self];
     
@@ -98,11 +99,11 @@
         imageNode.frame = CGRectMake(((i * imageNodeWidth) + (i * 4)), 0, imageNodeWidth, imageNodeHeight);
         imageNode.cornerRadius = 4;
         imageNode.clipsToBounds = NO;
-        imageNode.userInteractionEnabled = YES;
+        imageNode.view.userInteractionEnabled = YES;
         
         [imageNode addTarget:self action:@selector(imageTouchedDown:) forControlEvents:ASControlNodeEventTouchDown];
         [imageNode addTarget:self action:@selector(imageTouchedUpInside:) forControlEvents:ASControlNodeEventTouchUpInside];
-
+        
         self.initialCenters[i] = [NSValue valueWithCGPoint:imageNode.view.center];
         [self.view addSubview:imageNode.view];
     }
@@ -112,18 +113,30 @@
     }
     
     [self calculateFinalCenters];
+    
+    UIPanGestureRecognizer *pan = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(galleryDidPan:)];
+    [self.view addGestureRecognizer:pan];
 }
 
 - (void)imageTouchedDown:(ASNetworkImageNode *)imageNode;
 {
     if ([[imageNode.view pop_animationKeys] containsObject:@"scroll"] || [[imageNode.view pop_animationKeys] containsObject:@"firstNodeScroll"] || [[imageNode.view pop_animationKeys] containsObject:@"lastNodeScroll"]) {
         [self removeAnimationsFromNodes];
+        NSLog(@"touched down on image");
     }
 }
 
 - (void)imageTouchedUpInside:(ASNetworkImageNode *)imageNode;
 {
-    [self animateGalleryBackToStartOrEndingIfNecessary];
+//    [self animateGalleryBackToStartOrEndingIfNecessary];
+    
+    NSInteger index = [self.imageNodes indexOfObject:imageNode];
+    [self presentFullScreenImageGalleryStartingAtIndex:index];
+}
+
+- (void)presentFullScreenImageGalleryStartingAtIndex:(NSInteger)index;
+{
+    
 }
 
 - (void)goIntoFullScreenModeFocusedOnView:(UIView *)imageView;
@@ -290,6 +303,7 @@
             [self removeAnimationsFromNodes];
             //set up the bool values for what direction this pan is going
             if (abs(vel.y) > abs(vel.x)){
+                
                 _isPanningVertically = YES;
                 _oldTouch = [pan locationInView:self.view];
 //                _touchXPosition = [pan locationInView:self.view].x;
@@ -298,34 +312,32 @@
                 if (vel.y > 0) {
                     self.direction = SwipeGestureDirectionDown;
                     NSLog(@"DOWN!! at %f velocity", vel.y);
-                    self.isPanningVertically = YES;
                 } else {
                     NSLog(@"UP!! at %f velocity", vel.y);
                     self.direction = SwipeGestureDirectionUp;
-                    self.isPanningVertically = YES;
                 }
             } else {
                 _isPanningVertically = NO;
                 if (vel.x > 0) {
                     NSLog(@"RIGHT!! at %f velocity", vel.x);
                     self.direction = SwipeGestureDirectionRight;
-                    self.isPanningVertically = NO;
 
                 } else {
                     NSLog(@"LEFT!! at %f velocity", vel.x);
                     self.direction = SwipeGestureDirectionLeft;
-                    self.isPanningVertically = NO;
                 }
             }
             self.touchXPosition = [pan locationInView:self.view].x;
             break;
         case UIGestureRecognizerStateChanged:
             if (_isPanningVertically) {
+                NSLog(@"PANNING VERT!!");
                 //when you're panning vertically
                 //the chnages in y position should translate to a chnage in the scale of all the cards
                 //the changes in x position should translate to the centers of the all the cards shifting horizontally
                 
                 //for now just make the whole gallery follow the pan
+                
                 [self moveAllNodesyByDifferenceWithTouchLocation: [pan locationInView:self.view]];
 //                [self ]
             } else {
