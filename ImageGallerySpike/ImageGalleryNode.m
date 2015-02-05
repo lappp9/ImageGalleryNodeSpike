@@ -97,7 +97,7 @@
         self.imageUrls[i] = [self.dataSource imageGallery:self urlForImageAtIndex:i];
         imageNode.frame = CGRectMake(((i * imageNodeWidth) + (i * 4)), 0, imageNodeWidth, imageNodeHeight);
         imageNode.cornerRadius = 4;
-        imageNode.clipsToBounds = NO;
+        imageNode.clipsToBounds = YES;
         imageNode.view.userInteractionEnabled = YES;
         
         [imageNode addTarget:self action:@selector(imageTouchedDown:) forControlEvents:ASControlNodeEventTouchDown];
@@ -189,7 +189,7 @@
     _fullScreenFrame = CGRectMake(0, 0, self.view.superview.bounds.size.width, self.view.superview.bounds.size.height);
     self.backgroundColor = [UIColor darkGrayColor];
     _initialFrame = self.frame;
-    self.clipsToBounds = YES;
+    self.clipsToBounds = NO;
 }
 
 - (void)calculateFinalCenters;
