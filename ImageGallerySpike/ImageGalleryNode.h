@@ -1,6 +1,7 @@
 
 
 #import "ASDisplayNode.h"
+#import "FullScreenImageGalleryNode.h"
 #import <pop/POP.h>
 #import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
 #import <AsyncDisplayKit.h>
@@ -15,7 +16,7 @@ typedef NS_ENUM(NSInteger, SwipeGestureDirection) {
     SwipeGestureDirectionRight
 };
 
-@interface ImageGalleryNode : ASDisplayNode <_ASDisplayLayerDelegate, POPAnimationDelegate>
+@interface ImageGalleryNode : ASDisplayNode <POPAnimationDelegate, FullScreenImageGalleryDelegate>
 
 @property (weak) id <ImageGalleryDatasource> dataSource;
 @property (weak) id <ImageGalleryDelegate> delegate;

@@ -1,9 +1,9 @@
 
 #import "ImageGalleryNode.h"
-#import "FullScreenImageGalleryNode.h"
 
 @interface ImageGalleryNode ()<POPAnimationDelegate, UIGestureRecognizerDelegate>
 @property (nonatomic) NSMutableArray *imageNodes;
+@property (nonatomic) NSMutableArray *imageUrls;
 
 @property (nonatomic) FullScreenImageGalleryNode *fullScreenImageGalleryNode;
 
@@ -82,8 +82,6 @@
     }
     
     [self setupInitialState];
-    
-
 
     NSInteger numberOfImages = [self.dataSource numberOfImagesInImageGallery:self];
     
@@ -96,6 +94,7 @@
 
         imageNode.backgroundColor = [UIColor lightGrayColor];
         imageNode.URL = [self.dataSource imageGallery:self urlForImageAtIndex:i];
+        self.imageUrls[i] = [self.dataSource imageGallery:self urlForImageAtIndex:i];
         imageNode.frame = CGRectMake(((i * imageNodeWidth) + (i * 4)), 0, imageNodeWidth, imageNodeHeight);
         imageNode.cornerRadius = 4;
         imageNode.clipsToBounds = NO;
@@ -107,6 +106,9 @@
         self.initialCenters[i] = [NSValue valueWithCGPoint:imageNode.view.center];
         [self.view addSubview:imageNode.view];
     }
+    
+    self.fullScreenImageGalleryNode = [[FullScreenImageGalleryNode alloc] initWithImageUrls:self.imageUrls];
+    self.fullScreenImageGalleryNode.delegate = self;
     
     if ([self.delegate imageGalleryShouldDisplayPositions]) {
         [self addPositionLabelsToImageNodes];
@@ -136,7 +138,7 @@
 
 - (void)presentFullScreenImageGalleryStartingAtIndex:(NSInteger)index;
 {
-    
+
 }
 
 - (void)goIntoFullScreenModeFocusedOnView:(UIView *)imageView;
@@ -453,6 +455,18 @@
         anim.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut];
         [node.view pop_addAnimation:anim forKey:nil];
     }
+}
+
+#pragma mark Full Screen View Delegate Methods
+
+- (void)fullScreenImageGalleryDidAdvance;
+{
+    NSLog(@"The fullscreen gallery moved forward so move the small one to the right\n then update where the image should animate back to when its all done");
+}
+
+- (void)fullScreenImageGalleryDidRetreat;
+{
+    NSLog(@"The fullscreen gallery moved backward so move the small one to the left\n then update where the image should animate back to when its all done");
 }
 
 @end
