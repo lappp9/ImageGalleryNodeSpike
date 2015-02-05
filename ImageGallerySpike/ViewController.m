@@ -62,4 +62,10 @@
     return YES;
 }
 
+- (BOOL)imageGalleryShouldAllowFullScreenMode;
+{
+    //this way you can prevent newing up the images twice if you don't need to
+    return YES;
+}
+
 @end

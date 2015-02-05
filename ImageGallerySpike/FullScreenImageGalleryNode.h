@@ -9,7 +9,7 @@
 
 - (instancetype)initWithImageUrls:(NSArray *)imageUrls;
 - (void)hide;
-- (void)showAtIndex;
+- (void)showAtIndex:(NSInteger)index;
 
 @end
 

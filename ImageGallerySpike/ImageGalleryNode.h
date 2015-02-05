@@ -34,5 +34,6 @@ typedef NS_ENUM(NSInteger, SwipeGestureDirection) {
 @protocol ImageGalleryDelegate <NSObject>
 
 - (BOOL)imageGalleryShouldDisplayPositions;
+- (BOOL)imageGalleryShouldAllowFullScreenMode;
 
 @end

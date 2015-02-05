@@ -107,9 +107,15 @@
         [self.view addSubview:imageNode.view];
     }
     
-    self.fullScreenImageGalleryNode = [[FullScreenImageGalleryNode alloc] initWithImageUrls:self.imageUrls];
-    self.fullScreenImageGalleryNode.delegate = self;
-    
+    if ([self.delegate imageGalleryShouldAllowFullScreenMode]) {
+        self.fullScreenImageGalleryNode = [[FullScreenImageGalleryNode alloc] initWithImageUrls:self.imageUrls];
+        self.fullScreenImageGalleryNode.delegate = self;
+        self.fullScreenImageGalleryNode.frame = CGRectMake(0, 0, self.view.superview.frame.size.width, self.view.superview.frame.size.height);
+        self.fullScreenImageGalleryNode.backgroundColor = [UIColor blackColor];
+        self.fullScreenImageGalleryNode.hidden = YES;
+        [self.view.superview addSubview:self.fullScreenImageGalleryNode.view];
+    }
+
     if ([self.delegate imageGalleryShouldDisplayPositions]) {
         [self addPositionLabelsToImageNodes];
     }
@@ -138,7 +144,7 @@
 
 - (void)presentFullScreenImageGalleryStartingAtIndex:(NSInteger)index;
 {
-
+    [self.fullScreenImageGalleryNode showAtIndex:index];
 }
 
 - (void)goIntoFullScreenModeFocusedOnView:(UIView *)imageView;

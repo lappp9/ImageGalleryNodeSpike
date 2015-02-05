@@ -16,4 +16,14 @@
     return self;
 }
 
+- (void)hide;
+{
+    
+}
+
+- (void)showAtIndex:(NSInteger)index;
+{
+    
+}
+
 @end
