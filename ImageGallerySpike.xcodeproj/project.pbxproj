@@ -16,6 +16,7 @@
 		AECC98871A7C05B3009D867E /* ImageGallerySpikeTests.m in Sources */ = {isa = PBXBuildFile; fileRef = AECC98861A7C05B3009D867E /* ImageGallerySpikeTests.m */; };
 		AECC98951A7C346D009D867E /* ImageGalleryNode.m in Sources */ = {isa = PBXBuildFile; fileRef = AECC98941A7C346D009D867E /* ImageGalleryNode.m */; };
 		AECC98981A7C3503009D867E /* RainbowNode.m in Sources */ = {isa = PBXBuildFile; fileRef = AECC98971A7C3503009D867E /* RainbowNode.m */; };
+		AEFD79801A83E3B3004659C3 /* FullScreenImageGalleryNode.m in Sources */ = {isa = PBXBuildFile; fileRef = AEFD797F1A83E3B3004659C3 /* FullScreenImageGalleryNode.m */; };
 		D5417202A164E6F0C24AAD25 /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CFBFDF3500CE0579F826CD72 /* libPods.a */; };
 /* End PBXBuildFile section */
 
@@ -49,6 +50,8 @@
 		AECC98941A7C346D009D867E /* ImageGalleryNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ImageGalleryNode.m; sourceTree = "<group>"; };
 		AECC98961A7C3503009D867E /* RainbowNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RainbowNode.h; sourceTree = "<group>"; };
 		AECC98971A7C3503009D867E /* RainbowNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RainbowNode.m; sourceTree = "<group>"; };
+		AEFD797E1A83E3B2004659C3 /* FullScreenImageGalleryNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FullScreenImageGalleryNode.h; sourceTree = "<group>"; };
+		AEFD797F1A83E3B3004659C3 /* FullScreenImageGalleryNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FullScreenImageGalleryNode.m; sourceTree = "<group>"; };
 		CFBFDF3500CE0579F826CD72 /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -117,6 +120,8 @@
 				AECC98721A7C05B3009D867E /* ViewController.m */,
 				AECC98931A7C346D009D867E /* ImageGalleryNode.h */,
 				AECC98941A7C346D009D867E /* ImageGalleryNode.m */,
+				AEFD797E1A83E3B2004659C3 /* FullScreenImageGalleryNode.h */,
+				AEFD797F1A83E3B3004659C3 /* FullScreenImageGalleryNode.m */,
 				AECC98741A7C05B3009D867E /* Main.storyboard */,
 				AECC98771A7C05B3009D867E /* Images.xcassets */,
 				AECC98791A7C05B3009D867E /* LaunchScreen.xib */,
@@ -293,6 +298,7 @@
 				AECC98731A7C05B3009D867E /* ViewController.m in Sources */,
 				AECC98701A7C05B3009D867E /* AppDelegate.m in Sources */,
 				AECC986D1A7C05B3009D867E /* main.m in Sources */,
+				AEFD79801A83E3B3004659C3 /* FullScreenImageGalleryNode.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

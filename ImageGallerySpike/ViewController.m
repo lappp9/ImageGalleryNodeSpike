@@ -14,10 +14,8 @@
     
     self.edgesForExtendedLayout = UIRectEdgeNone;
     
-    CGFloat galleryWidth = self.view.bounds.size.width;
-
     ImageGalleryNode *imageGallery = [[ImageGalleryNode alloc] init];
-    imageGallery.frame = CGRectMake(8, 8, galleryWidth - 16, 250);
+    imageGallery.frame = CGRectMake(0, self.view.frame.size.height - 250, self.view.frame.size.width, 250);
     imageGallery.cornerRadius = 4;
     imageGallery.dataSource = self;
     imageGallery.delegate = self;
@@ -34,9 +32,6 @@
 
 - (NSURL *)imageGallery:(ImageGalleryNode *)imageGallery urlForImageAtIndex:(NSInteger)index;
 {
-    if (index == 0) {
-        return [NSURL URLWithString:@"http://img.vast.com/original/4004703374594052526"];
-    }
     
     CGFloat rand1 = arc4random_uniform(200) + 200;
     CGFloat rand2 = arc4random_uniform(200) + 200;
@@ -64,6 +59,12 @@
 
 - (BOOL)prefersStatusBarHidden;
 {
+    return YES;
+}
+
+- (BOOL)imageGalleryShouldAllowFullScreenMode;
+{
+    //this way you can prevent newing up the images twice if you don't need to
     return YES;
 }
 

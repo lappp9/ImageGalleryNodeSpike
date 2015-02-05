@@ -1,6 +1,7 @@
 
 
 #import "ASDisplayNode.h"
+#import "FullScreenImageGalleryNode.h"
 #import <pop/POP.h>
 #import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
 #import <AsyncDisplayKit.h>
@@ -8,7 +9,14 @@
 @protocol ImageGalleryDatasource;
 @protocol ImageGalleryDelegate;
 
-@interface ImageGalleryNode : ASDisplayNode <_ASDisplayLayerDelegate, POPAnimationDelegate>
+typedef NS_ENUM(NSInteger, SwipeGestureDirection) {
+    SwipeGestureDirectionUp,
+    SwipeGestureDirectionDown,
+    SwipeGestureDirectionLeft,
+    SwipeGestureDirectionRight
+};
+
+@interface ImageGalleryNode : ASDisplayNode <POPAnimationDelegate, FullScreenImageGalleryDelegate>
 
 @property (weak) id <ImageGalleryDatasource> dataSource;
 @property (weak) id <ImageGalleryDelegate> delegate;
@@ -26,5 +34,6 @@
 @protocol ImageGalleryDelegate <NSObject>
 
 - (BOOL)imageGalleryShouldDisplayPositions;
+- (BOOL)imageGalleryShouldAllowFullScreenMode;
 
 @end
