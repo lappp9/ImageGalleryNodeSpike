@@ -94,6 +94,7 @@
         imageNode.backgroundColor = [UIColor lightGrayColor];
         imageNode.URL = [self.dataSource imageGallery:self urlForImageAtIndex:i];
         self.imageUrls[i] = [self.dataSource imageGallery:self urlForImageAtIndex:i];
+        
         imageNode.frame = CGRectMake(((i * imageNodeWidth) + (i * 4)), 0, imageNodeWidth, imageNodeHeight);
         imageNode.cornerRadius = 4;
         imageNode.clipsToBounds = YES;
@@ -103,7 +104,7 @@
         [imageNode addTarget:self action:@selector(imageTouchedUpInside:) forControlEvents:ASControlNodeEventTouchUpInside];
         
         self.initialCenters[i] = [NSValue valueWithCGPoint:imageNode.view.center];
-        [self.view addSubview:imageNode.view];
+        [self addSubnode:imageNode];
     }
     
     if ([self.delegate imageGalleryShouldAllowFullScreenMode]) {
@@ -182,6 +183,7 @@
 
 - (void)setupInitialState
 {
+    self.imageUrls = @[].mutableCopy;
     self.imageNodes = @[].mutableCopy;
     self.initialCenters = @[].mutableCopy;
     self.finalCenters = @[].mutableCopy;

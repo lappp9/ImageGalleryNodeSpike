@@ -32,6 +32,9 @@
 
 - (NSURL *)imageGallery:(ImageGalleryNode *)imageGallery urlForImageAtIndex:(NSInteger)index;
 {
+    if (index == 0) {
+        return [NSURL URLWithString:@"http://img.vast.com/original/4004703374594052526"];
+    }
     
     CGFloat rand1 = arc4random_uniform(200) + 200;
     CGFloat rand2 = arc4random_uniform(200) + 200;

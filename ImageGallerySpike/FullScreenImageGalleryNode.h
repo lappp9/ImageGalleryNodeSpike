@@ -1,5 +1,8 @@
 
 #import "ASDisplayNode.h"
+#import <pop/POP.h>
+#import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
+#import <AsyncDisplayKit.h>
 
 @protocol FullScreenImageGalleryDelegate;
 
