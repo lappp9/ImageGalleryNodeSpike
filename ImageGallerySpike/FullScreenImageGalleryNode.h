@@ -9,6 +9,9 @@
 @interface FullScreenImageGalleryNode : ASDisplayNode <ASNetworkImageNodeDelegate>
 
 @property (weak) id <FullScreenImageGalleryDelegate> delegate;
+@property (nonatomic) CGRect frameToWhichToAnimateBack;
+@property (nonatomic) CGSize sizeToAnimateBackTo;
+@property (nonatomic) CGPoint positionToAnimateBackTo;
 
 - (instancetype)initWithImageUrls:(NSArray *)imageUrls;
 

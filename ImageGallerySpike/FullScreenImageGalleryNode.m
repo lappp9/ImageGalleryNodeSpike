@@ -129,13 +129,43 @@
 
 - (void)hide;
 {
-    self.hidden = YES;
-    self.backgroundColor = [UIColor clearColor];
-    [self.delegate unhideHiddenView];
-    for (ASNetworkImageNode *node in self.subnodes) {
-        [node removeFromSupernode];
+    //animate view back to right spot
+    
+    POPSpringAnimation *anim = [POPSpringAnimation animationWithPropertyNamed:kPOPLayerPosition];
+    anim.toValue = [NSValue valueWithCGPoint: self.positionToAnimateBackTo];
+    anim.springBounciness = 5;
+    anim.springSpeed = 12;
+    
+    POPSpringAnimation *sizeAnim = [POPSpringAnimation animationWithPropertyNamed:kPOPLayerSize];
+    sizeAnim.toValue = [NSValue valueWithCGSize:self.sizeToAnimateBackTo];
+    sizeAnim.springBounciness = 5;
+    sizeAnim.springSpeed = 12;
+    
+    POPBasicAnimation *cornerAnim = [POPBasicAnimation animationWithPropertyNamed:kPOPLayerCornerRadius];
+    cornerAnim.toValue = @(4);
+    
+    void (^completion)(POPAnimation *anim, BOOL completed) = ^(POPAnimation *anim, BOOL completed){
+        if (completed) {
+            self.hidden = YES;
+            self.backgroundColor = [UIColor clearColor];
+            [self.delegate unhideHiddenView];
+            for (ASNetworkImageNode *node in self.subnodes) {
+                [node removeFromSupernode];
+            }
+        }
+    };
+    
+    anim.completionBlock = completion;
+    sizeAnim.completionBlock = completion;
+    cornerAnim.completionBlock = completion;
+    
+    [self.currentImageNode pop_addAnimation:anim forKey:nil];
+    [self.currentImageNode pop_addAnimation:cornerAnim forKey:nil];
+    
+//    POPBasicAnimation colorAnim = [POPBasicAnimation animationWithPropertyNamed:kPOPLayerBackgroundColor];
+//    colorAnim.toValue = [UIColor clearColor];
+    
     }
-}
 
 - (void)showAtIndex:(NSInteger)index;
 {

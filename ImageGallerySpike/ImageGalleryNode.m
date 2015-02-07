@@ -33,6 +33,8 @@
 @property (nonatomic) ASNetworkImageNode *hiddenNode;
 @property (nonatomic) ASNetworkImageNode *lastNodeTouched;
 @property (nonatomic) CGRect lastNodeTouchedFrame;
+@property (nonatomic) CGSize lastNodeTouchedSize;
+@property (nonatomic) CGPoint lastNodeTouchedPosition;
 
 //maybe i should be keeping track of the frame of every subview in small mode
 //then in large mode i can update these views in the back ground based on you swiping around
@@ -141,15 +143,16 @@
         [self removeAnimationsFromNodes];
     }
     
-    self.lastNodeTouched = imageNode;
-    self.lastNodeTouchedFrame = imageNode.frame;
-    NSLog(@"touched down on image");
+    [self.view bringSubviewToFront:imageNode.view];
+
+    self.lastNodeTouched         = imageNode;
+    self.lastNodeTouchedFrame    = imageNode.frame;
+    self.lastNodeTouchedSize     = imageNode.frame.size;
+    self.lastNodeTouchedPosition = imageNode.position;
 }
 
 - (void)imageTouchedUpInside:(ASNetworkImageNode *)imageNode;
 {
-//    [self animateGalleryBackToStartOrEndingIfNecessary];
-    
     NSInteger index = [self.imageNodes indexOfObject:imageNode];
     [self presentFullScreenImageGalleryStartingAtIndex:index];
     self.hiddenNode = imageNode;
@@ -158,41 +161,54 @@
 
 - (void)presentFullScreenImageGalleryStartingAtIndex:(NSInteger)index;
 {
+//    CGPoint newPosition = [self.view.superview convertPoint:centerOfScreen toView:self.view];
+
+    self.fullScreenImageGalleryNode.sizeToAnimateBackTo     = self.lastNodeTouchedSize;
+    self.fullScreenImageGalleryNode.positionToAnimateBackTo =  [self.view convertPoint:self.lastNodeTouchedPosition toView:self.view.superview];;
+    
+//    self.fullScreenImageGalleryNode.frameToWhichToAnimateBack = [self.view convertRect:self.lastNodeTouchedFrame toView:self.view.superview]; //self.lastNodeTouchedFrame;
     [self.fullScreenImageGalleryNode showAtIndex:index];
 }
 
-- (void)goIntoFullScreenModeFocusedOnView:(UIView *)imageView;
+- (void)animateIntoFullScreenMode;
 {
-    _isFullScreen = YES;
+    CGPoint centerOfScreen = CGPointMake(UIScreen.mainScreen.bounds.size.width/2, UIScreen.mainScreen.bounds.size.height/2);
     
-    POPSpringAnimation *spring = [POPSpringAnimation animationWithPropertyNamed:kPOPViewFrame];
-    spring.fromValue = [NSValue valueWithCGRect:self.frame];
-    spring.toValue = [NSValue valueWithCGRect:_fullScreenFrame];
-    spring.springBounciness = 1;
-    spring.springSpeed = 20;
+    CGPoint newPosition = [self.view.superview convertPoint:centerOfScreen toView:self.view];
     
-    POPSpringAnimation *imageSpring = [POPSpringAnimation animationWithPropertyNamed:kPOPViewFrame];
-    imageSpring.fromValue = [NSValue valueWithCGRect:imageView.frame];
-    imageSpring.toValue = [NSValue valueWithCGRect:_fullScreenFrame];
-    imageSpring.springBounciness = 1;
-    imageSpring.springSpeed = 20;
+    POPSpringAnimation *anim = [POPSpringAnimation animationWithPropertyNamed:kPOPLayerPosition];
+    anim.fromValue = [NSValue valueWithCGPoint:self.lastNodeTouched.position];
+    anim.toValue = [NSValue valueWithCGPoint: newPosition];
+    anim.springBounciness = 5;
+    anim.springSpeed = 20;
     
-    for (ASNetworkImageNode *node in self.imageNodes) {
-        NSInteger i = [self.imageNodes indexOfObject:node];
-        
-        if ([node.view isEqual:imageView]) {
-            NSLog(@"you tapped the %ld image", (long)i);
-            node.URL = [self.dataSource imageGallery:self urlForImageAtIndex:i];
-            //figure out how to change content mode to aspect fit and blow up
-            [self.view bringSubviewToFront:node.view];
-            //don't make this one disappear
-        } else {
-//            node.alpha = 0.0;
+    POPSpringAnimation *sizeAnim = [POPSpringAnimation animationWithPropertyNamed:kPOPLayerSize];
+    sizeAnim.toValue = [NSValue valueWithCGSize:CGSizeMake(UIScreen.mainScreen.bounds.size.width, [self proportionateHeightForImage:_lastNodeTouched.image])];
+    sizeAnim.springBounciness = 5;
+    sizeAnim.springSpeed = 20;
+    
+    POPBasicAnimation *cornerAnim = [POPBasicAnimation animationWithPropertyNamed:kPOPLayerCornerRadius];
+    cornerAnim.toValue = @(0);
+    
+    void (^completion)(POPAnimation *anim, BOOL completed) = ^(POPAnimation *anim, BOOL completed){
+        if (completed) {
+            NSInteger index = [[self imageNodes] indexOfObject:self.lastNodeTouched];
+            [self presentFullScreenImageGalleryStartingAtIndex:index];
+            
+            self.lastNodeTouched.cornerRadius = 4;
+            self.lastNodeTouched.frame = self.lastNodeTouchedFrame;
+            self.hiddenNode = self.lastNodeTouched;
+            self.hiddenNode.hidden = YES;
         }
-    }
-   
-    [self pop_addAnimation:spring forKey:nil];
-    [imageView pop_addAnimation:imageSpring forKey:nil];
+    };
+    
+    anim.completionBlock = completion;
+    sizeAnim.completionBlock = completion;
+    cornerAnim.completionBlock = completion;
+    
+    [self.lastNodeTouched pop_addAnimation:sizeAnim forKey:nil];
+    [self.lastNodeTouched pop_addAnimation:anim forKey:nil];
+    [self.lastNodeTouched pop_addAnimation:cornerAnim forKey:nil];
 }
 
 - (void)setupInitialState
@@ -316,8 +332,6 @@
                 _isPanningVertically = YES;
                 _previousTouchLocation = [pan locationInView:self.view];
                 _oldTouch = [pan locationInView:self.view];
-//                _touchXPosition = [pan locationInView:self.view].x;
-//                _touchYPosition = [pan locationInView:self.view].y;
                 
                 if (vel.y > 0) {
                     self.direction = SwipeGestureDirectionDown;
@@ -360,47 +374,7 @@
         case UIGestureRecognizerStateEnded:
             if (_isPanningVertically) {
                 if (!_isFullScreen) {
-                    
-                    CGPoint centerOfScreen = CGPointMake(UIScreen.mainScreen.bounds.size.width/2, UIScreen.mainScreen.bounds.size.height/2);
-                    
-                    CGPoint newPosition = [self.view.superview convertPoint:centerOfScreen toView:self.view];
-                    
-                    POPSpringAnimation *anim = [POPSpringAnimation animationWithPropertyNamed:kPOPLayerPosition];
-                    anim.fromValue = [NSValue valueWithCGPoint:self.lastNodeTouched.position];
-                    anim.toValue = [NSValue valueWithCGPoint: newPosition];
-                    anim.springBounciness = 5;
-                    anim.springSpeed = 20;
-                    
-                    POPSpringAnimation *sizeAnim = [POPSpringAnimation animationWithPropertyNamed:kPOPLayerSize];
-                    sizeAnim.toValue = [NSValue valueWithCGSize:CGSizeMake(UIScreen.mainScreen.bounds.size.width, [self proportionateHeightForImage:_lastNodeTouched.image])];
-                    sizeAnim.springBounciness = 5;
-                    sizeAnim.springSpeed = 20;
-                    
-                    anim.completionBlock = ^(POPAnimation *anim, BOOL completed){
-                        if (completed) {
-                            NSInteger index = [[self imageNodes] indexOfObject:self.lastNodeTouched];
-                            [self.fullScreenImageGalleryNode showAtIndex:index];
-                            
-                            self.lastNodeTouched.frame = self.lastNodeTouchedFrame;
-                            self.hiddenNode = self.lastNodeTouched;
-                            self.hiddenNode.hidden = YES;
-                        }
-                    };
-                    
-                    sizeAnim.completionBlock =  ^(POPAnimation *anim, BOOL completed){
-                        if (completed) {
-                            NSInteger index = [[self imageNodes] indexOfObject:self.lastNodeTouched];
-                            [self.fullScreenImageGalleryNode showAtIndex:index];
-                            
-                            self.lastNodeTouched.frame = self.lastNodeTouchedFrame;
-                            self.hiddenNode = self.lastNodeTouched;
-                            self.hiddenNode.hidden = YES;
-                        }
-                    };
-                    
-                    [self.lastNodeTouched pop_addAnimation:sizeAnim forKey:nil];
-                    [self.lastNodeTouched pop_addAnimation:anim forKey:nil];
-
+                    [self animateIntoFullScreenMode];
                 }
             } else {
             

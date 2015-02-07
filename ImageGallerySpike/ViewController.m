@@ -58,7 +58,7 @@
 
 - (BOOL)imageGalleryShouldDisplayPositions;
 {
-    return YES;
+    return NO;
 }
 
 - (BOOL)prefersStatusBarHidden;
