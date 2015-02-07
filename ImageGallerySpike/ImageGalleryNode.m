@@ -12,6 +12,8 @@
 @property (nonatomic) CGFloat newX;
 @property (nonatomic) CGFloat newY;
 @property (nonatomic) CGPoint oldTouch;
+@property (nonatomic) CGPoint previousTouchLocation;
+
 @property (nonatomic) CGFloat difference;
 
 //when hitting an edge, you can just animte all the views back to their initial or ending places
@@ -27,6 +29,10 @@
 
 //keep this around to go back to small view
 @property (nonatomic) CGRect initialFrame;
+
+@property (nonatomic) ASNetworkImageNode *hiddenNode;
+@property (nonatomic) ASNetworkImageNode *lastNodeTouched;
+@property (nonatomic) CGRect lastNodeToucedFrame;
 
 //maybe i should be keeping track of the frame of every subview in small mode
 //then in large mode i can update these views in the back ground based on you swiping around
@@ -67,7 +73,7 @@
    isRasterizing:(BOOL)isRasterizing
 {
     if (!isRasterizing) {
-        [[UIColor blackColor] set];
+        [[UIColor whiteColor] set];
         UIRectFill(bounds);
     }
 }
@@ -98,9 +104,11 @@
         imageNode.cornerRadius = 4;
         imageNode.clipsToBounds = YES;
         imageNode.view.userInteractionEnabled = YES;
-        
-//        [imageNode addTarget:self action:@selector(imageTouchedDown:) forControlEvents:ASControlNodeEventTouchDown];
-//        [imageNode addTarget:self action:@selector(imageTouchedUpInside:) forControlEvents:ASControlNodeEventTouchUpInside];
+        imageNode.contentMode = UIViewContentModeScaleAspectFill;
+        imageNode.defaultImage = [UIImage imageNamed:@"cat"];
+
+        [imageNode addTarget:self action:@selector(imageTouchedDown:) forControlEvents:ASControlNodeEventTouchDown];
+        [imageNode addTarget:self action:@selector(imageTouchedUpInside:) forControlEvents:ASControlNodeEventTouchUpInside];
         
         self.initialCenters[i] = [NSValue valueWithCGPoint:imageNode.view.center];
         self.imageNodes[i] = imageNode;
@@ -109,6 +117,7 @@
     
     if ([self.delegate imageGalleryShouldAllowFullScreenMode]) {
         self.fullScreenImageGalleryNode = [[FullScreenImageGalleryNode alloc] initWithImageUrls:self.imageUrls];
+        
         self.fullScreenImageGalleryNode.delegate = self;
         self.fullScreenImageGalleryNode.frame = CGRectMake(0, 0, self.view.superview.frame.size.width, self.view.superview.frame.size.height);
         self.fullScreenImageGalleryNode.backgroundColor = [UIColor blackColor];
@@ -124,22 +133,17 @@
     
     UIPanGestureRecognizer *pan = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(galleryDidPan:)];
     [self.view addGestureRecognizer:pan];
-    
-    UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(galleryWasTapped:)];
-    [((ASNetworkImageNode *)self.imageNodes.firstObject).view addGestureRecognizer:tap];
-}
-
-- (void)galleryWasTapped:(UITapGestureRecognizer *)tap;
-{
-    
 }
 
 - (void)imageTouchedDown:(ASNetworkImageNode *)imageNode;
 {
     if ([[imageNode.view pop_animationKeys] containsObject:@"scroll"] || [[imageNode.view pop_animationKeys] containsObject:@"firstNodeScroll"] || [[imageNode.view pop_animationKeys] containsObject:@"lastNodeScroll"]) {
         [self removeAnimationsFromNodes];
-        NSLog(@"touched down on image");
     }
+    
+    self.lastNodeTouched = imageNode;
+    self.lastNodeToucedFrame = imageNode.frame;
+    NSLog(@"touched down on image");
 }
 
 - (void)imageTouchedUpInside:(ASNetworkImageNode *)imageNode;
@@ -148,6 +152,8 @@
     
     NSInteger index = [self.imageNodes indexOfObject:imageNode];
     [self presentFullScreenImageGalleryStartingAtIndex:index];
+    self.hiddenNode = imageNode;
+    imageNode.hidden = YES;
 }
 
 - (void)presentFullScreenImageGalleryStartingAtIndex:(NSInteger)index;
@@ -273,20 +279,6 @@
     }
 }
 
-- (void)moveAllNodesyByDifferenceWithTouchLocation:(CGPoint)touch;
-{
-    //Whenever this is called i need to add some animations to chnage the scale and the
-    
-    //animate to the new center?
-//    CGFloat xDifference = touch.x - _oldTouch.x;
-//    CGFloat yDifference = touch.y - _oldTouch.y;
-//
-//    CGPoint newCenterForView = CGPointMake(self.view.center.x + xDifference, self.view.center.y + yDifference);
-//    self.view.center = newCenterForView;
-//    
-//    _oldTouch = touch;
-}
-
 - (void)addDecayAnimationToAllSubviewsWithVelocity:(CGFloat)xVelocity;
 {
     for (ASDisplayNode *node in self.imageNodes) {
@@ -322,6 +314,7 @@
             if (abs(vel.y) > abs(vel.x)){
                 
                 _isPanningVertically = YES;
+                _previousTouchLocation = [pan locationInView:self.view];
                 _oldTouch = [pan locationInView:self.view];
 //                _touchXPosition = [pan locationInView:self.view].x;
 //                _touchYPosition = [pan locationInView:self.view].y;
@@ -349,48 +342,71 @@
         case UIGestureRecognizerStateChanged:
             if (_isPanningVertically) {
                 NSLog(@"PANNING VERT!!");
-                //when you're panning vertically
-                //the chnages in y position should translate to a chnage in the scale of all the cards
-                //the changes in x position should translate to the centers of the all the cards shifting horizontally
                 
-                //for now just make the whole gallery follow the pan
+                CGFloat xDifference = [pan locationInView:self.view].x - _previousTouchLocation.x;
+                CGFloat yDifference = [pan locationInView:self.view].y - _previousTouchLocation.y;
                 
-                [self moveAllNodesyByDifferenceWithTouchLocation: [pan locationInView:self.view]];
-//                [self ]
+                CGPoint newImageCenter = CGPointMake(self.lastNodeTouched.view.center.x + xDifference, self.lastNodeTouched.view.center.y + yDifference);
+                
+                self.lastNodeTouched.view.center = newImageCenter;
+                _previousTouchLocation = [pan locationInView:self.view];
             } else {
-                //when you're panning horizontally
-                //the changes in x position should translate to the centers of the all the cards shifting horizontally
-
                 _newX = [pan locationInView:self.view].x;
                 _difference = _newX - _touchXPosition;
                 [self moveAllNodesHorizontallyByDifference];
                 _touchXPosition = _newX;
             }
-
             break;
         case UIGestureRecognizerStateEnded:
+            if (_isPanningVertically) {
+                if (!_isFullScreen) {
+                    
+                    CGPoint centerOfScreen = CGPointMake(UIScreen.mainScreen.bounds.size.width/2, UIScreen.mainScreen.bounds.size.height/2);
+                    
+//                    CGPoint newPosition = [self convertPoint:centerOfScreen toNode:<#(ASDisplayNode *)#>]
+                    CGPoint newPosition = [self.view.superview convertPoint:centerOfScreen toView:self.view];
+                    
+                    POPSpringAnimation *anim = [POPSpringAnimation animationWithPropertyNamed:kPOPLayerPosition];
+                    anim.fromValue = [NSValue valueWithCGPoint:self.lastNodeTouched.position];
+                    anim.toValue = [NSValue valueWithCGPoint: newPosition];
+                    anim.springBounciness = 5;
+                    anim.springSpeed = 20;
+//                    
+//                    POPSpringAnimation *sizeAnim = [POPSpringAnimation animationWithPropertyNamed:kPOPLayerPosition];
+//                    sizeAnim.fromValue = [NSValue valueWithCGPoint:self.lastNodeTouched.position];
+//                    sizeAnim.toValue = [NSValue valueWithCGPoint: newPosition];
+//                    sizeAnim.springBounciness = 5;
+//                    sizeAnim.springSpeed = 20;
+                    
+                    [self.lastNodeTouched pop_addAnimation:anim forKey:nil];
+
+                }
+            } else {
+            
+                //when you were panning vertically,
+                    //if isFullscreen is YES then change it to NO and animate back to the small screen
+                    //if isFullscreen is NO then change it to YES and animate the card you touched on the initial pan to be the full screen view
+                
+                CGFloat rightSide = (self.frame.size.width - ((ASNetworkImageNode *)self.imageNodes[self.imageNodes.count-1]).frame.size.width);
+                CGFloat lastX = ((ASDisplayNode *)self.imageNodes[self.imageNodes.count-1]).frame.origin.x;
+            
+    //            NSLog(@"The last images X origin is %f", lastX);
+                //when you were panning horizontally, add a decay animation to scroll and make sure to watch out for the edges
+                if (((ASDisplayNode *)self.imageNodes[0]).frame.origin.x > 1) {
+                    [self animateViewsBackToStartingPosition];
+                } else if (lastX >= 0 && lastX < rightSide + 1) {
+    //            } else if (((ASDisplayNode *)self.imageNodes[self.imageNodes.count-1]).frame.origin.x < 130) {
+                    
+                    // origin.x distance from the right side
+                    //if the last image's frame.origin.x is between 0 self.view.width - node.view.width
+                    [self animateViewsBackToEndingPosition];
+                } else {
+                    [self addDecayAnimationToAllSubviewsWithVelocity:[pan velocityInView:self.view].x];
+                }
+            }
             
             _isPanningVertically = NO;
-            //when you were panning vertically,
-                //if isFullscreen is YES then change it to NO and animate back to the small screen
-                //if isFullscreen is NO then change it to YES and animate the card you touched on the initial pan to be the full screen view
-            
-            CGFloat rightSide = (self.frame.size.width - ((ASNetworkImageNode *)self.imageNodes[self.imageNodes.count-1]).frame.size.width);
-            CGFloat lastX = ((ASDisplayNode *)self.imageNodes[self.imageNodes.count-1]).frame.origin.x;
-        
-//            NSLog(@"The last images X origin is %f", lastX);
-            //when you were panning horizontally, add a decay animation to scroll and make sure to watch out for the edges
-            if (((ASDisplayNode *)self.imageNodes[0]).frame.origin.x > 1) {
-                [self animateViewsBackToStartingPosition];
-            } else if (lastX >= 0 && lastX < rightSide + 1) {
-//            } else if (((ASDisplayNode *)self.imageNodes[self.imageNodes.count-1]).frame.origin.x < 130) {
-                
-                // origin.x distance from the right side
-                //if the last image's frame.origin.x is between 0 self.view.width - node.view.width
-                [self animateViewsBackToEndingPosition];
-            } else {
-                [self addDecayAnimationToAllSubviewsWithVelocity:[pan velocityInView:self.view].x];
-            }
+
             break;
         default:
             break;
@@ -476,6 +492,8 @@
 
 - (void)fullScreenImageGalleryDidAdvance;
 {
+    //change which small image is hidden
+    //
     NSLog(@"The fullscreen gallery moved forward so move the small one to the right\n then update where the image should animate back to when its all done");
 }
 
@@ -484,6 +502,9 @@
     NSLog(@"The fullscreen gallery moved backward so move the small one to the left\n then update where the image should animate back to when its all done");
 }
 
+- (void)unhideHiddenView;
+{
+    self.hiddenNode.hidden = NO;
+}
+
 @end
-
-

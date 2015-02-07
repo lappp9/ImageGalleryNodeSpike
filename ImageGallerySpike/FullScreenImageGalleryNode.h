@@ -6,11 +6,12 @@
 
 @protocol FullScreenImageGalleryDelegate;
 
-@interface FullScreenImageGalleryNode : ASDisplayNode
+@interface FullScreenImageGalleryNode : ASDisplayNode <ASNetworkImageNodeDelegate>
 
 @property (weak) id <FullScreenImageGalleryDelegate> delegate;
 
 - (instancetype)initWithImageUrls:(NSArray *)imageUrls;
+
 - (void)hide;
 - (void)showAtIndex:(NSInteger)index;
 
@@ -18,6 +19,7 @@
 
 @protocol FullScreenImageGalleryDelegate <NSObject>
 
+- (void)unhideHiddenView;
 - (void)fullScreenImageGalleryDidAdvance;
 - (void)fullScreenImageGalleryDidRetreat;
 
