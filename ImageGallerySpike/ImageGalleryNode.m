@@ -89,7 +89,6 @@
         CGFloat imageNodeHeight = self.bounds.size.height;
         
         ASNetworkImageNode *imageNode = [[ASNetworkImageNode alloc] init];
-        self.imageNodes[i] = imageNode;
 
         imageNode.backgroundColor = [UIColor lightGrayColor];
         imageNode.URL = [self.dataSource imageGallery:self urlForImageAtIndex:i];
@@ -100,10 +99,11 @@
         imageNode.clipsToBounds = YES;
         imageNode.view.userInteractionEnabled = YES;
         
-        [imageNode addTarget:self action:@selector(imageTouchedDown:) forControlEvents:ASControlNodeEventTouchDown];
-        [imageNode addTarget:self action:@selector(imageTouchedUpInside:) forControlEvents:ASControlNodeEventTouchUpInside];
+//        [imageNode addTarget:self action:@selector(imageTouchedDown:) forControlEvents:ASControlNodeEventTouchDown];
+//        [imageNode addTarget:self action:@selector(imageTouchedUpInside:) forControlEvents:ASControlNodeEventTouchUpInside];
         
         self.initialCenters[i] = [NSValue valueWithCGPoint:imageNode.view.center];
+        self.imageNodes[i] = imageNode;
         [self addSubnode:imageNode];
     }
     
@@ -124,6 +124,14 @@
     
     UIPanGestureRecognizer *pan = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(galleryDidPan:)];
     [self.view addGestureRecognizer:pan];
+    
+    UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(galleryWasTapped:)];
+    [((ASNetworkImageNode *)self.imageNodes.firstObject).view addGestureRecognizer:tap];
+}
+
+- (void)galleryWasTapped:(UITapGestureRecognizer *)tap;
+{
+    
 }
 
 - (void)imageTouchedDown:(ASNetworkImageNode *)imageNode;
