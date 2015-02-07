@@ -52,7 +52,6 @@
     NSLog(@"\n Image: %@", image);
     
     return (UIScreen.mainScreen.bounds.size.width * image.size.height)/image.size.width;
-//    return 200;
 }
 
 - (void)galleryDidPan:(UIPanGestureRecognizer *)pan;

@@ -32,7 +32,7 @@
 
 @property (nonatomic) ASNetworkImageNode *hiddenNode;
 @property (nonatomic) ASNetworkImageNode *lastNodeTouched;
-@property (nonatomic) CGRect lastNodeToucedFrame;
+@property (nonatomic) CGRect lastNodeTouchedFrame;
 
 //maybe i should be keeping track of the frame of every subview in small mode
 //then in large mode i can update these views in the back ground based on you swiping around
@@ -142,7 +142,7 @@
     }
     
     self.lastNodeTouched = imageNode;
-    self.lastNodeToucedFrame = imageNode.frame;
+    self.lastNodeTouchedFrame = imageNode.frame;
     NSLog(@"touched down on image");
 }
 
@@ -363,7 +363,6 @@
                     
                     CGPoint centerOfScreen = CGPointMake(UIScreen.mainScreen.bounds.size.width/2, UIScreen.mainScreen.bounds.size.height/2);
                     
-//                    CGPoint newPosition = [self convertPoint:centerOfScreen toNode:<#(ASDisplayNode *)#>]
                     CGPoint newPosition = [self.view.superview convertPoint:centerOfScreen toView:self.view];
                     
                     POPSpringAnimation *anim = [POPSpringAnimation animationWithPropertyNamed:kPOPLayerPosition];
@@ -371,13 +370,35 @@
                     anim.toValue = [NSValue valueWithCGPoint: newPosition];
                     anim.springBounciness = 5;
                     anim.springSpeed = 20;
-//                    
-//                    POPSpringAnimation *sizeAnim = [POPSpringAnimation animationWithPropertyNamed:kPOPLayerPosition];
-//                    sizeAnim.fromValue = [NSValue valueWithCGPoint:self.lastNodeTouched.position];
-//                    sizeAnim.toValue = [NSValue valueWithCGPoint: newPosition];
-//                    sizeAnim.springBounciness = 5;
-//                    sizeAnim.springSpeed = 20;
                     
+                    POPSpringAnimation *sizeAnim = [POPSpringAnimation animationWithPropertyNamed:kPOPLayerSize];
+                    sizeAnim.toValue = [NSValue valueWithCGSize:CGSizeMake(UIScreen.mainScreen.bounds.size.width, [self proportionateHeightForImage:_lastNodeTouched.image])];
+                    sizeAnim.springBounciness = 5;
+                    sizeAnim.springSpeed = 20;
+                    
+                    anim.completionBlock = ^(POPAnimation *anim, BOOL completed){
+                        if (completed) {
+                            NSInteger index = [[self imageNodes] indexOfObject:self.lastNodeTouched];
+                            [self.fullScreenImageGalleryNode showAtIndex:index];
+                            
+                            self.lastNodeTouched.frame = self.lastNodeTouchedFrame;
+                            self.hiddenNode = self.lastNodeTouched;
+                            self.hiddenNode.hidden = YES;
+                        }
+                    };
+                    
+                    sizeAnim.completionBlock =  ^(POPAnimation *anim, BOOL completed){
+                        if (completed) {
+                            NSInteger index = [[self imageNodes] indexOfObject:self.lastNodeTouched];
+                            [self.fullScreenImageGalleryNode showAtIndex:index];
+                            
+                            self.lastNodeTouched.frame = self.lastNodeTouchedFrame;
+                            self.hiddenNode = self.lastNodeTouched;
+                            self.hiddenNode.hidden = YES;
+                        }
+                    };
+                    
+                    [self.lastNodeTouched pop_addAnimation:sizeAnim forKey:nil];
                     [self.lastNodeTouched pop_addAnimation:anim forKey:nil];
 
                 }
@@ -505,6 +526,15 @@
 - (void)unhideHiddenView;
 {
     self.hiddenNode.hidden = NO;
+}
+
+#pragma mark Utilities
+
+- (CGFloat)proportionateHeightForImage:(UIImage *)image;
+{
+    NSLog(@"\n Image: %@", image);
+    
+    return (UIScreen.mainScreen.bounds.size.width * image.size.height)/image.size.width;
 }
 
 @end

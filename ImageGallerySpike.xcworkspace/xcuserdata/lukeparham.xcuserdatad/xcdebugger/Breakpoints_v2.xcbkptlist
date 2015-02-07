@@ -20,11 +20,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ImageGallerySpike/FullScreenImageGalleryNode.m"
-            timestampString = "445031939.495926"
+            timestampString = "445035152.351899"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "90"
-            endingLineNumber = "90"
+            startingLineNumber = "89"
+            endingLineNumber = "89"
             landmarkName = "-galleryDidPan:"
             landmarkType = "5">
          </BreakpointContent>
@@ -36,11 +36,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ImageGallerySpike/FullScreenImageGalleryNode.m"
-            timestampString = "445033520.622279"
+            timestampString = "445035152.351899"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "147"
-            endingLineNumber = "147"
+            startingLineNumber = "146"
+            endingLineNumber = "146"
             landmarkName = "-showAtIndex:"
             landmarkType = "5">
          </BreakpointContent>
@@ -51,13 +51,13 @@
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "ImageGallerySpike/FullScreenImageGalleryNode.m"
-            timestampString = "445031939.495926"
+            filePath = "ImageGallerySpike/ImageGalleryNode.m"
+            timestampString = "445035152.351899"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "55"
-            endingLineNumber = "55"
-            landmarkName = "-proportionateHeightForImage:"
+            startingLineNumber = "367"
+            endingLineNumber = "367"
+            landmarkName = "-galleryDidPan:"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
@@ -68,11 +68,57 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ImageGallerySpike/ImageGalleryNode.m"
-            timestampString = "445034034.395749"
+            timestampString = "445035286.613807"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "368"
-            endingLineNumber = "368"
+            startingLineNumber = "378"
+            endingLineNumber = "378"
+            landmarkName = "-galleryDidPan:"
+            landmarkType = "5">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "-[ImageGalleryNode galleryDidPan:]"
+                  moduleName = "ImageGallerySpike"
+                  urlString = "file:///Users/lukeparham/Projects/iOS/ImageGalleryNodeSpike/ImageGallerySpike/ImageGalleryNode.m"
+                  timestampString = "445035292.552453"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "379"
+                  endingLineNumber = "379"
+                  offsetFromSymbolStart = "3504">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "__34-[ImageGalleryNode galleryDidPan:]_block_invoke"
+                  moduleName = "ImageGallerySpike"
+                  urlString = "file:///Users/lukeparham/Projects/iOS/ImageGalleryNodeSpike/ImageGallerySpike/ImageGalleryNode.m"
+                  timestampString = "445035292.552609"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "379"
+                  endingLineNumber = "379"
+                  offsetFromSymbolStart = "52">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ImageGallerySpike/ImageGalleryNode.m"
+            timestampString = "445035287.595359"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "380"
+            endingLineNumber = "380"
             landmarkName = "-galleryDidPan:"
             landmarkType = "5">
          </BreakpointContent>
