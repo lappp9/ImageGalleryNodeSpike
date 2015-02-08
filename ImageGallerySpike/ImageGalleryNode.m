@@ -153,27 +153,40 @@
 
 - (void)imageTouchedUpInside:(ASNetworkImageNode *)imageNode;
 {
-    NSInteger index = [self.imageNodes indexOfObject:imageNode];
-    [self presentFullScreenImageGalleryStartingAtIndex:index];
-    self.hiddenNode = imageNode;
-    imageNode.hidden = YES;
-}
-
-- (void)presentFullScreenImageGalleryStartingAtIndex:(NSInteger)index;
-{
-//    CGPoint newPosition = [self.view.superview convertPoint:centerOfScreen toView:self.view];
-
-    self.fullScreenImageGalleryNode.sizeToAnimateBackTo     = self.lastNodeTouchedSize;
-    self.fullScreenImageGalleryNode.positionToAnimateBackTo =  [self.view convertPoint:self.lastNodeTouchedPosition toView:self.view.superview];;
-    
-//    self.fullScreenImageGalleryNode.frameToWhichToAnimateBack = [self.view convertRect:self.lastNodeTouchedFrame toView:self.view.superview]; //self.lastNodeTouchedFrame;
-    [self.fullScreenImageGalleryNode showAtIndex:index];
+    [self animateIntoFullScreenMode];
 }
 
 - (void)animateIntoFullScreenMode;
 {
-    CGPoint centerOfScreen = CGPointMake(UIScreen.mainScreen.bounds.size.width/2, UIScreen.mainScreen.bounds.size.height/2);
+    NSLog(@"\n\n\nThe image's width is %f and height is %f\n\n\n", self.lastNodeTouchedFrame.size.width, self.lastNodeTouchedFrame.size.height);
     
+    //add full screen view as subview of our view
+    //use handy conversion to get it to cover the screen
+    //animate a fade of it's darkness from 0 to 1
+    //remove it from the view when its done
+    
+    CGSize screenSize = [[UIScreen mainScreen] bounds].size;
+
+    CGRect fullscreenFrame = [self.view.superview convertRect:CGRectMake(0, 0, screenSize.width, screenSize.height) toView:self.view];
+    
+    ASDisplayNode *darkBackground = [[ASDisplayNode alloc] init];
+    darkBackground.layerBacked = YES;
+    darkBackground.backgroundColor = [UIColor blackColor];
+    darkBackground.frame = fullscreenFrame;
+    darkBackground.alpha = 0.0;
+    
+    POPBasicAnimation *alphaAnim = [POPBasicAnimation animationWithPropertyNamed:kPOPViewAlpha];
+    alphaAnim.fromValue = @(0.0);
+    alphaAnim.toValue = @(1.0);
+    alphaAnim.completionBlock = ^(POPAnimation *anim, BOOL completed) {
+        darkBackground.alpha = 0.0;
+    };
+    [self addSubnode:darkBackground];
+    [self.view bringSubviewToFront:self.lastNodeTouched.view];
+
+    [darkBackground pop_addAnimation:alphaAnim forKey:nil];
+    
+    CGPoint centerOfScreen = CGPointMake(UIScreen.mainScreen.bounds.size.width/2, UIScreen.mainScreen.bounds.size.height/2);
     CGPoint newPosition = [self.view.superview convertPoint:centerOfScreen toView:self.view];
     
     POPSpringAnimation *anim = [POPSpringAnimation animationWithPropertyNamed:kPOPLayerPosition];
@@ -209,6 +222,14 @@
     [self.lastNodeTouched pop_addAnimation:sizeAnim forKey:nil];
     [self.lastNodeTouched pop_addAnimation:anim forKey:nil];
     [self.lastNodeTouched pop_addAnimation:cornerAnim forKey:nil];
+}
+
+- (void)presentFullScreenImageGalleryStartingAtIndex:(NSInteger)index;
+{
+    self.fullScreenImageGalleryNode.sizeToAnimateBackTo     = self.lastNodeTouchedSize;
+    self.fullScreenImageGalleryNode.positionToAnimateBackTo =  [self.view convertPoint:self.lastNodeTouchedPosition toView:self.view.superview];;
+    
+    [self.fullScreenImageGalleryNode showAtIndex:index];
 }
 
 - (void)setupInitialState
@@ -355,7 +376,6 @@
             break;
         case UIGestureRecognizerStateChanged:
             if (_isPanningVertically) {
-                NSLog(@"PANNING VERT!!");
                 
                 CGFloat xDifference = [pan locationInView:self.view].x - _previousTouchLocation.x;
                 CGFloat yDifference = [pan locationInView:self.view].y - _previousTouchLocation.y;

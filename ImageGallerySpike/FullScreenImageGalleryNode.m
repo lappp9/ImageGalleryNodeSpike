@@ -25,6 +25,7 @@
         node.view.userInteractionEnabled = YES;
         node.defaultImage = [UIImage imageNamed:@"cat"];
         node.delegate = self;
+        node.clipsToBounds = YES;
 
         node.contentMode = UIViewContentModeScaleAspectFill;
         node.URL = self.imageUrls[i];
@@ -94,14 +95,10 @@
                 
                 self.currentImageNode.view.center = newImageCenter;
                 _previousTouchLocation = [pan locationInView:self.view];
-
-
-                NSLog(@"PANNING VERT!!");
                 
             } else {
                 //when you're panning horizontally
                 //the changes in x position should translate to the centers of the all the cards shifting horizontally
-
             }
             
             break;
@@ -131,12 +128,19 @@
 {
     //animate view back to right spot
     
+    NSLog(@"\n\n\nThe image's width is animating to %f and height is animating to %f\n\n\n", self.sizeToAnimateBackTo.width, self.sizeToAnimateBackTo.height);
+    
+    CGSize  originalSize         = self.currentImageNode.frame.size;
+    CGPoint originalPosition     = self.currentImageNode.position;
+    CGFloat originalCornerRadius = 0;
+    
     POPSpringAnimation *anim = [POPSpringAnimation animationWithPropertyNamed:kPOPLayerPosition];
     anim.toValue = [NSValue valueWithCGPoint: self.positionToAnimateBackTo];
     anim.springBounciness = 5;
     anim.springSpeed = 12;
     
     POPSpringAnimation *sizeAnim = [POPSpringAnimation animationWithPropertyNamed:kPOPLayerSize];
+    sizeAnim.fromValue = [NSValue valueWithCGSize:self.currentImageNode.frame.size];
     sizeAnim.toValue = [NSValue valueWithCGSize:self.sizeToAnimateBackTo];
     sizeAnim.springBounciness = 5;
     sizeAnim.springSpeed = 12;
@@ -146,9 +150,14 @@
     
     void (^completion)(POPAnimation *anim, BOOL completed) = ^(POPAnimation *anim, BOOL completed){
         if (completed) {
-            self.hidden = YES;
-            self.backgroundColor = [UIColor clearColor];
             [self.delegate unhideHiddenView];
+
+            self.hidden = YES;
+            
+            self.currentImageNode.frame = CGRectMake(0, 0, originalSize.width, originalSize.height);
+            self.currentImageNode.position = originalPosition;
+            self.currentImageNode.cornerRadius = originalCornerRadius;
+            
             for (ASNetworkImageNode *node in self.subnodes) {
                 [node removeFromSupernode];
             }
@@ -159,11 +168,9 @@
     sizeAnim.completionBlock = completion;
     cornerAnim.completionBlock = completion;
     
-    [self.currentImageNode pop_addAnimation:anim forKey:nil];
-    [self.currentImageNode pop_addAnimation:cornerAnim forKey:nil];
-    
-//    POPBasicAnimation colorAnim = [POPBasicAnimation animationWithPropertyNamed:kPOPLayerBackgroundColor];
-//    colorAnim.toValue = [UIColor clearColor];
+    [self.currentImageNode.layer pop_addAnimation:anim forKey:nil];
+    [self.currentImageNode.layer pop_addAnimation:cornerAnim forKey:nil];
+    [self.currentImageNode.layer pop_addAnimation:sizeAnim forKey:nil];
     
     }
 
