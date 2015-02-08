@@ -91,9 +91,9 @@
                 CGFloat xDifference = [pan locationInView:self.view].x - _previousTouchLocation.x;
                 CGFloat yDifference = [pan locationInView:self.view].y - _previousTouchLocation.y;
                 
-                CGPoint newImageCenter = CGPointMake(self.currentImageNode.view.center.x + xDifference, self.currentImageNode.view.center.y + yDifference);
+                CGPoint newImagePosition = CGPointMake(self.currentImageNode.position.x + xDifference, self.currentImageNode.position.y + yDifference);
                 
-                self.currentImageNode.view.center = newImageCenter;
+                self.currentImageNode.position = newImagePosition;
                 _previousTouchLocation = [pan locationInView:self.view];
                 
             } else {
@@ -126,8 +126,8 @@
 
 - (void)hide;
 {
-    //animate view back to right spot
-    
+    NSLog(@"\n\n\nThe image's width is animating from %f and height is animating from %f\n\n\n", self.currentImageNode.frame.size.width, self.currentImageNode.frame.size.height);
+
     NSLog(@"\n\n\nThe image's width is animating to %f and height is animating to %f\n\n\n", self.sizeToAnimateBackTo.width, self.sizeToAnimateBackTo.height);
     
     CGSize  originalSize         = self.currentImageNode.frame.size;

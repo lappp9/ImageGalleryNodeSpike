@@ -56,17 +56,24 @@
  
  1) allow swiping up to transfer to full screen
  
-    -- check where the touch lands and make sure that's the view that animates to the center of the screen
-    
-    -- tapping should transfer from small to large and back again
- 
-    -- since this isn't necessarily at the bottom of the screen, panning vertically in any direction should make the whole gallery
-       scale up and then down when the pan continues in the other direction
- 
     -- add pinching to resize image and rotate at any given time
  
- 2) Make the fullscreen view a different view controller that gets navigated to and gets passed the same objects as this one via the same delegate methods...
-    -- not sure how smart that is but whatevs
+    -- right now the image you see that the small one animates to is zoomed in further than the full screen image that is shown when it transfers
+       to the fullscreen view.  To fix that I'll try a few things.  
+        OPTION 1:  Start each image at teh full size then scale down so maybe it will have the same focus when scaled back up.
+        OPTION 2: If that doesn't work, make the image node's size the correct proportions from the beginning.  Then make it a subview of 
+                  some other view that is sized to the correct size in the small gallery, that way the image's focus shouldn't be affected
+ 
+    -- Right now the fullscreen gallery is re-downloading all the images from the same URL's.  That's dumb, just pass along all the images upon it's creation,
+       then implement the network image node delegate method for when images load in this class, and when each one is loaded update the image that is in the 
+       fullscreen gallery.  
+ 
+    -- Wait, maybe just make a datasource method for the Full screen image gallery node called image at index .... wait no, that shouldn't work because then
+       how would it update?  First idea is better.  The full screen gallery should just have ASImageNodes not network image nodes.
+ 
+    -- Eventually it needs to let you swipe left and right in fullscreen mode.  When this happens this class should change which image is hidden and
+       shift all the nodes to the left or right by one imagenodes width
+ 
 */
 
 #pragma mark View Drawing
@@ -160,7 +167,10 @@
 
 - (void)animateIntoFullScreenMode;
 {
-    NSLog(@"\n\n\nThe image's width is %f and height is %f\n\n\n", self.lastNodeTouchedFrame.size.width, self.lastNodeTouchedFrame.size.height);
+    NSLog(@"\n\n\nThe image's width is animating from %f and height is animating from %f\n\n\n", self.lastNodeTouchedFrame.size.width, self.lastNodeTouchedFrame.size.height);
+    
+    NSLog(@"\n\n\nThe image's width is animating to %f and height is animating to %f\n\n\n", UIScreen.mainScreen.bounds.size.width, [self proportionateHeightForImage:_lastNodeTouched.image]);
+
     
     //add full screen view as subview of our view
     //use handy conversion to get it to cover the screen
