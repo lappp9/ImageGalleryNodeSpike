@@ -36,6 +36,8 @@
 @property (nonatomic) CGSize lastNodeTouchedSize;
 @property (nonatomic) CGPoint lastNodeTouchedPosition;
 
+@property (nonatomic) ASDisplayNode *darkBackground;
+
 //maybe i should be keeping track of the frame of every subview in small mode
 //then in large mode i can update these views in the back ground based on you swiping around
 //that way when you go back into small mode i can just animate all these subviews to the appropriate place
@@ -164,31 +166,13 @@
     //use handy conversion to get it to cover the screen
     //animate a fade of it's darkness from 0 to 1
     //remove it from the view when its done
-    
-    CGSize screenSize = [[UIScreen mainScreen] bounds].size;
 
-    CGRect fullscreenFrame = [self.view.superview convertRect:CGRectMake(0, 0, screenSize.width, screenSize.height) toView:self.view];
-    
-    ASDisplayNode *darkBackground = [[ASDisplayNode alloc] init];
-    darkBackground.layerBacked = YES;
-    darkBackground.backgroundColor = [UIColor blackColor];
-    darkBackground.frame = fullscreenFrame;
-    darkBackground.alpha = 0.0;
-    
-    POPBasicAnimation *alphaAnim = [POPBasicAnimation animationWithPropertyNamed:kPOPViewAlpha];
-    alphaAnim.fromValue = @(0.0);
-    alphaAnim.toValue = @(1.0);
-    alphaAnim.completionBlock = ^(POPAnimation *anim, BOOL completed) {
-        darkBackground.alpha = 0.0;
-    };
-    [self addSubnode:darkBackground];
+    [self.view bringSubviewToFront:self.darkBackground.view];
     [self.view bringSubviewToFront:self.lastNodeTouched.view];
-
-    [darkBackground pop_addAnimation:alphaAnim forKey:nil];
     
     CGPoint centerOfScreen = CGPointMake(UIScreen.mainScreen.bounds.size.width/2, UIScreen.mainScreen.bounds.size.height/2);
     CGPoint newPosition = [self.view.superview convertPoint:centerOfScreen toView:self.view];
-    
+
     POPSpringAnimation *anim = [POPSpringAnimation animationWithPropertyNamed:kPOPLayerPosition];
     anim.fromValue = [NSValue valueWithCGPoint:self.lastNodeTouched.position];
     anim.toValue = [NSValue valueWithCGPoint: newPosition];
@@ -204,6 +188,9 @@
     cornerAnim.toValue = @(0);
     
     void (^completion)(POPAnimation *anim, BOOL completed) = ^(POPAnimation *anim, BOOL completed){
+        
+        
+        
         if (completed) {
             NSInteger index = [[self imageNodes] indexOfObject:self.lastNodeTouched];
             [self presentFullScreenImageGalleryStartingAtIndex:index];
@@ -215,10 +202,18 @@
         }
     };
     
+    POPBasicAnimation *alphaAnim = [POPBasicAnimation animationWithPropertyNamed:kPOPViewAlpha];
+    alphaAnim.fromValue = @(0.0);
+    alphaAnim.toValue = @(1.0);
+    alphaAnim.completionBlock = ^(POPAnimation *anim, BOOL completed) {
+        self.darkBackground.alpha = 0.0;
+    };
+    
     anim.completionBlock = completion;
     sizeAnim.completionBlock = completion;
     cornerAnim.completionBlock = completion;
     
+    [_darkBackground pop_addAnimation:alphaAnim forKey:nil];
     [self.lastNodeTouched pop_addAnimation:sizeAnim forKey:nil];
     [self.lastNodeTouched pop_addAnimation:anim forKey:nil];
     [self.lastNodeTouched pop_addAnimation:cornerAnim forKey:nil];
@@ -242,6 +237,16 @@
     self.backgroundColor = [UIColor darkGrayColor];
     _initialFrame = self.frame;
     self.clipsToBounds = NO;
+    
+    CGSize screenSize = [[UIScreen mainScreen] bounds].size;
+    CGRect fullscreenFrame = [self.view.superview convertRect:CGRectMake(0, 0, screenSize.width, screenSize.height) toView:self.view];
+
+    _darkBackground = [[ASDisplayNode alloc] init];
+    _darkBackground.backgroundColor = [UIColor blackColor];
+    _darkBackground.frame = fullscreenFrame;
+    _darkBackground.alpha = 0.0;
+    
+    [self addSubnode:_darkBackground];
 }
 
 - (void)calculateFinalCenters;
