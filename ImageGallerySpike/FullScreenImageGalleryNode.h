@@ -14,6 +14,7 @@
 @property (nonatomic) CGPoint positionToAnimateBackTo;
 
 - (instancetype)initWithImageUrls:(NSArray *)imageUrls;
+- (instancetype)initWithImages:(NSArray *)images;
 
 - (void)hide;
 - (void)showAtIndex:(NSInteger)index;

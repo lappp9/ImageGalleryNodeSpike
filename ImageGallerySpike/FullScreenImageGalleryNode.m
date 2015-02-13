@@ -7,11 +7,35 @@
 @property (nonatomic) NSMutableArray *images;
 
 @property (nonatomic) BOOL isPanningVertically;
-@property (nonatomic) ASNetworkImageNode *currentImageNode;
+@property (nonatomic) ASImageNode *currentImageNode;
 @property (nonatomic) CGPoint previousTouchLocation;
 @end
 
 @implementation FullScreenImageGalleryNode
+
+- (instancetype)initWithImages:(NSArray *)images;
+{
+    if (!(self = [super init])) { return nil; }
+    
+    self.imageNodes = @[].mutableCopy;
+    
+    for (NSInteger i = 0; i < images.count; i++) {
+        ASImageNode *node = [[ASImageNode alloc] init];
+        node.image = images[i];
+        node.view.userInteractionEnabled = YES;
+        node.clipsToBounds = YES;
+        node.contentMode = UIViewContentModeScaleAspectFill;
+        node.frame = CGRectMake(0, 0, UIScreen.mainScreen.bounds.size.width, [self proportionateHeightForImage:images[i]]);
+        node.placeholderColor = [UIColor orangeColor];
+        
+        self.imageNodes[i] = node;
+    }
+    
+    UIPanGestureRecognizer *pan = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(galleryDidPan:)];
+    [self.view addGestureRecognizer:pan];
+    return self;
+}
+
 
 - (instancetype)initWithImageUrls:(NSArray *)imageUrls;
 {
@@ -21,15 +45,10 @@
     self.imageNodes = @[].mutableCopy;
     
     for (NSInteger i = 0; i < self.imageUrls.count; i++) {
-        ASNetworkImageNode *node = [[ASNetworkImageNode alloc] init];
+        ASImageNode *node = [[ASImageNode alloc] init];
         node.view.userInteractionEnabled = YES;
-        node.defaultImage = [UIImage imageNamed:@"cat"];
-        node.delegate = self;
         node.clipsToBounds = YES;
-
         node.contentMode = UIViewContentModeScaleAspectFill;
-        node.URL = self.imageUrls[i];
-
         node.frame = CGRectMake(0, 0, UIScreen.mainScreen.bounds.size.width, 200);
         node.placeholderColor = [UIColor orangeColor];
 
@@ -42,7 +61,7 @@
     return self;
 }
 
-- (void)imageNode:(ASNetworkImageNode *)imageNode didLoadImage:(UIImage *)image;
+- (void)imageNode:(ASImageNode *)imageNode didLoadImage:(UIImage *)image;
 {
     imageNode.frame = CGRectMake(0, 0, UIScreen.mainScreen.bounds.size.width, [self proportionateHeightForImage:image]);
     imageNode.position = self.view.center;
@@ -114,12 +133,12 @@
     }
 }
 
-- (void)imageTouchedDown:(ASNetworkImageNode *)node;
+- (void)imageTouchedDown:(ASImageNode *)node;
 {
     NSLog(@"image touched down");
 }
 
-- (void)imageTouchedUpInside:(ASNetworkImageNode *)node;
+- (void)imageTouchedUpInside:(ASImageNode *)node;
 {
     NSLog(@"image touched up inside");
 }
@@ -158,7 +177,7 @@
             self.currentImageNode.position = originalPosition;
             self.currentImageNode.cornerRadius = originalCornerRadius;
             
-            for (ASNetworkImageNode *node in self.subnodes) {
+            for (ASImageNode *node in self.subnodes) {
                 [node removeFromSupernode];
             }
         }
@@ -180,7 +199,7 @@
     //three frame positions at a time?
     self.hidden = NO;
     self.backgroundColor = [UIColor blackColor];
-    ASNetworkImageNode *node = (ASNetworkImageNode *)self.imageNodes[index];
+    ASImageNode *node = (ASImageNode *)self.imageNodes[index];
     node.position = self.view.center;
 
     self.currentImageNode = node;

@@ -108,7 +108,6 @@
         UIImageView *imageNode = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"car.jpg"]];
 
         imageNode.backgroundColor = [UIColor purpleColor];
-//        imageNode.URL = [self.dataSource imageGallery:self urlForImageAtIndex:i];
         self.imageUrls[i] = [self.dataSource imageGallery:self urlForImageAtIndex:i];
         
         imageNode.frame = CGRectMake(((i * imageNodeWidth) + (i * 4)), 0, imageNodeWidth, imageNodeHeight);
@@ -116,14 +115,9 @@
         imageNode.clipsToBounds = YES;
         imageNode.userInteractionEnabled = YES;
         imageNode.contentMode = UIViewContentModeScaleAspectFill;
-//        imageNode.delegate = self;
 
-//        imageNode.defaultImage = [UIImage imageNamed:@"cat"];
-        UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(imageTouchedUpInside:)];
+        UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(imageWasTapped:)];
         [imageNode addGestureRecognizer:tap];
-
-//        [imageNode addTarget:self action:@selector(imageTouchedDown:) forControlEvents:ASControlNodeEventTouchDown];
-//        [imageNode addTarget:self action:@selector(imageTouchedUpInside:) forControlEvents:ASControlNodeEventTouchUpInside];
         
         self.initialCenters[i] = [NSValue valueWithCGPoint:imageNode.center];
         self.imageNodes[i] = imageNode;
@@ -131,7 +125,13 @@
     }
     
     if ([self.delegate imageGalleryShouldAllowFullScreenMode]) {
-        self.fullScreenImageGalleryNode = [[FullScreenImageGalleryNode alloc] initWithImageUrls:self.imageUrls];
+        
+        NSMutableArray *images = @[].mutableCopy;
+        for (UIImageView *imageView in self.imageNodes) {
+            [images addObject:imageView.image];
+        }
+        
+        self.fullScreenImageGalleryNode = [[FullScreenImageGalleryNode alloc] initWithImages:images];
         
         self.fullScreenImageGalleryNode.delegate = self;
         self.fullScreenImageGalleryNode.frame = CGRectMake(0, 0, self.view.superview.frame.size.width, self.view.superview.frame.size.height);
@@ -164,7 +164,7 @@
     self.lastNodeTouchedPosition = imageNode.center;
 }
 
-- (void)imageTouchedUpInside:(UITapGestureRecognizer *)tap;
+- (void)imageWasTapped:(UITapGestureRecognizer *)tap;
 {
     UIImageView *imageNode = (UIImageView *)tap.view;
     
@@ -369,6 +369,14 @@
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event;
 {
+    UIImageView *touchedImageView = (UIImageView *)[[touches anyObject] view];
+    self.lastNodeTouched         = touchedImageView;
+    self.lastNodeTouchedFrame    = touchedImageView.frame;
+    self.lastNodeTouchedSize     = touchedImageView.frame.size;
+    self.lastNodeTouchedPosition = touchedImageView.center;
+    
+    [self.view bringSubviewToFront:self.lastNodeTouched];
+
     [self removeAnimationsFromNodes];
 }
 
@@ -485,19 +493,19 @@
 
 - (void)pop_animationDidApply:(POPAnimation *)anim;
 {
-    ASDisplayNode *lastNode = (ASDisplayNode *)self.imageNodes.lastObject;
+    UIImageView *lastNode = (UIImageView *)self.imageNodes.lastObject;
     CGFloat sweetSpotXValue = self.frame.size.width - lastNode.frame.size.width;
     
-    if (((ASDisplayNode *)self.imageNodes[0]).frame.origin.x > 50) {
-        POPAnimation *lastDecay = [((ASDisplayNode *)self.imageNodes.lastObject).view pop_animationForKey:@"lastNodeScroll"];
+    if (((UIImageView *)self.imageNodes[0]).frame.origin.x > 50) {
+        POPAnimation *lastDecay = [((UIImageView *)self.imageNodes.lastObject) pop_animationForKey:@"lastNodeScroll"];
         
         if ([anim isEqual:lastDecay]) {
             [self removeAnimationsFromNodes];
             [self animateViewsBackToStartingPosition];
         }
     }
-    if (((ASDisplayNode *)self.imageNodes.lastObject).frame.origin.x < sweetSpotXValue - 55) {
-        POPAnimation *lastDecay = [((ASDisplayNode *)self.imageNodes.lastObject).view pop_animationForKey:@"lastNodeScroll"];
+    if (((UIImageView *)self.imageNodes.lastObject).frame.origin.x < sweetSpotXValue - 55) {
+        POPAnimation *lastDecay = [((UIImageView *)self.imageNodes.lastObject) pop_animationForKey:@"lastNodeScroll"];
         
         if ([anim isEqual:lastDecay]) {
             [self removeAnimationsFromNodes];
@@ -510,28 +518,28 @@
 
 - (void)animateViewsBackToEndingPosition;
 {
-    for (ASDisplayNode *node in self.imageNodes) {
+    for (UIImageView *node in self.imageNodes) {
         NSUInteger i = [self.imageNodes indexOfObject:node];
     
         POPBasicAnimation *anim = [POPBasicAnimation animationWithPropertyNamed:kPOPViewCenter];
-        anim.fromValue = [NSValue valueWithCGPoint:node.view.center];
+        anim.fromValue = [NSValue valueWithCGPoint:node.center];
         anim.toValue = self.finalCenters[i];
         anim.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut];
     
-        [node.view pop_addAnimation:anim forKey:nil];
+        [node pop_addAnimation:anim forKey:nil];
     }
 }
 
 - (void)animateViewsBackToStartingPosition;
 {
-    for (ASDisplayNode *node in self.imageNodes) {
+    for (UIImageView *node in self.imageNodes) {
         NSUInteger i = [self.imageNodes indexOfObject:node];
         
         POPBasicAnimation *anim = [POPBasicAnimation animationWithPropertyNamed:kPOPViewCenter];
-        anim.fromValue = [NSValue valueWithCGPoint:node.view.center];
+        anim.fromValue = [NSValue valueWithCGPoint:node.center];
         anim.toValue = self.initialCenters[i];
         anim.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut];
-        [node.view pop_addAnimation:anim forKey:nil];
+        [node pop_addAnimation:anim forKey:nil];
     }
 }
 
@@ -539,8 +547,6 @@
 
 - (void)fullScreenImageGalleryDidAdvance;
 {
-    //change which small image is hidden
-    //
     NSLog(@"The fullscreen gallery moved forward so move the small one to the right\n then update where the image should animate back to when its all done");
 }
 

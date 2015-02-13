@@ -15,7 +15,7 @@
     self.edgesForExtendedLayout = UIRectEdgeNone;
     
     ImageGalleryNode *imageGallery = [[ImageGalleryNode alloc] init];
-    imageGallery.frame = CGRectMake(10, self.view.frame.size.height - 250-250, self.view.frame.size.width - 20, 100);
+    imageGallery.frame = CGRectMake(0, self.view.frame.size.height - 250, self.view.frame.size.width, 250);
     imageGallery.cornerRadius = 4;
     imageGallery.dataSource = self;
     imageGallery.delegate = self;

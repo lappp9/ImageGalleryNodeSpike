@@ -16,7 +16,7 @@ typedef NS_ENUM(NSInteger, SwipeGestureDirection) {
     SwipeGestureDirectionRight
 };
 
-@interface ImageGalleryNode : ASDisplayNode <POPAnimationDelegate, FullScreenImageGalleryDelegate, ASNetworkImageNodeDelegate>
+@interface ImageGalleryNode : ASDisplayNode <POPAnimationDelegate, FullScreenImageGalleryDelegate>
 
 @property (weak) id <ImageGalleryDatasource> dataSource;
 @property (weak) id <ImageGalleryDelegate> delegate;
