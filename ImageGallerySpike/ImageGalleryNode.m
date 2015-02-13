@@ -30,8 +30,8 @@
 //keep this around to go back to small view
 @property (nonatomic) CGRect initialFrame;
 
-@property (nonatomic) ASNetworkImageNode *hiddenNode;
-@property (nonatomic) ASNetworkImageNode *lastNodeTouched;
+@property (nonatomic) UIImageView *hiddenNode;
+@property (nonatomic) UIImageView *lastNodeTouched;
 @property (nonatomic) CGRect lastNodeTouchedFrame;
 @property (nonatomic) CGSize lastNodeTouchedSize;
 @property (nonatomic) CGPoint lastNodeTouchedPosition;
@@ -105,25 +105,29 @@
         CGFloat imageNodeWidth = [self.dataSource widthForImages];
         CGFloat imageNodeHeight = self.bounds.size.height;
         
-        ASNetworkImageNode *imageNode = [[ASNetworkImageNode alloc] init];
+        UIImageView *imageNode = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"car.jpg"]];
 
-        imageNode.backgroundColor = [UIColor lightGrayColor];
-        imageNode.URL = [self.dataSource imageGallery:self urlForImageAtIndex:i];
+        imageNode.backgroundColor = [UIColor purpleColor];
+//        imageNode.URL = [self.dataSource imageGallery:self urlForImageAtIndex:i];
         self.imageUrls[i] = [self.dataSource imageGallery:self urlForImageAtIndex:i];
         
         imageNode.frame = CGRectMake(((i * imageNodeWidth) + (i * 4)), 0, imageNodeWidth, imageNodeHeight);
-        imageNode.cornerRadius = 4;
+        imageNode.layer.cornerRadius = 4;
         imageNode.clipsToBounds = YES;
-        imageNode.view.userInteractionEnabled = YES;
+        imageNode.userInteractionEnabled = YES;
         imageNode.contentMode = UIViewContentModeScaleAspectFill;
-        imageNode.defaultImage = [UIImage imageNamed:@"cat"];
+//        imageNode.delegate = self;
 
-        [imageNode addTarget:self action:@selector(imageTouchedDown:) forControlEvents:ASControlNodeEventTouchDown];
-        [imageNode addTarget:self action:@selector(imageTouchedUpInside:) forControlEvents:ASControlNodeEventTouchUpInside];
+//        imageNode.defaultImage = [UIImage imageNamed:@"cat"];
+        UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(imageTouchedUpInside:)];
+        [imageNode addGestureRecognizer:tap];
+
+//        [imageNode addTarget:self action:@selector(imageTouchedDown:) forControlEvents:ASControlNodeEventTouchDown];
+//        [imageNode addTarget:self action:@selector(imageTouchedUpInside:) forControlEvents:ASControlNodeEventTouchUpInside];
         
-        self.initialCenters[i] = [NSValue valueWithCGPoint:imageNode.view.center];
+        self.initialCenters[i] = [NSValue valueWithCGPoint:imageNode.center];
         self.imageNodes[i] = imageNode;
-        [self addSubnode:imageNode];
+        [self.view addSubview:imageNode];
     }
     
     if ([self.delegate imageGalleryShouldAllowFullScreenMode]) {
@@ -146,22 +150,35 @@
     [self.view addGestureRecognizer:pan];
 }
 
-- (void)imageTouchedDown:(ASNetworkImageNode *)imageNode;
+- (void)imageTouchedDown:(UIImageView *)imageNode;
 {
-    if ([[imageNode.view pop_animationKeys] containsObject:@"scroll"] || [[imageNode.view pop_animationKeys] containsObject:@"firstNodeScroll"] || [[imageNode.view pop_animationKeys] containsObject:@"lastNodeScroll"]) {
+    if ([[imageNode pop_animationKeys] containsObject:@"scroll"] || [[imageNode pop_animationKeys] containsObject:@"firstNodeScroll"] || [[imageNode pop_animationKeys] containsObject:@"lastNodeScroll"]) {
         [self removeAnimationsFromNodes];
     }
     
-    [self.view bringSubviewToFront:imageNode.view];
+    [self.view bringSubviewToFront:imageNode];
 
     self.lastNodeTouched         = imageNode;
     self.lastNodeTouchedFrame    = imageNode.frame;
     self.lastNodeTouchedSize     = imageNode.frame.size;
-    self.lastNodeTouchedPosition = imageNode.position;
+    self.lastNodeTouchedPosition = imageNode.center;
 }
 
-- (void)imageTouchedUpInside:(ASNetworkImageNode *)imageNode;
+- (void)imageTouchedUpInside:(UITapGestureRecognizer *)tap;
 {
+    UIImageView *imageNode = (UIImageView *)tap.view;
+    
+    if ([[imageNode pop_animationKeys] containsObject:@"scroll"] || [[imageNode pop_animationKeys] containsObject:@"firstNodeScroll"] || [[imageNode pop_animationKeys] containsObject:@"lastNodeScroll"]) {
+        [self removeAnimationsFromNodes];
+    }
+    
+    [self.view bringSubviewToFront:imageNode];
+    
+    self.lastNodeTouched         = imageNode;
+    self.lastNodeTouchedFrame    = imageNode.frame;
+    self.lastNodeTouchedSize     = imageNode.frame.size;
+    self.lastNodeTouchedPosition = imageNode.center;
+    
     [self animateIntoFullScreenMode];
 }
 
@@ -178,13 +195,13 @@
     //remove it from the view when its done
 
     [self.view bringSubviewToFront:self.darkBackground.view];
-    [self.view bringSubviewToFront:self.lastNodeTouched.view];
+    [self.view bringSubviewToFront:self.lastNodeTouched];
     
     CGPoint centerOfScreen = CGPointMake(UIScreen.mainScreen.bounds.size.width/2, UIScreen.mainScreen.bounds.size.height/2);
     CGPoint newPosition = [self.view.superview convertPoint:centerOfScreen toView:self.view];
 
     POPSpringAnimation *anim = [POPSpringAnimation animationWithPropertyNamed:kPOPLayerPosition];
-    anim.fromValue = [NSValue valueWithCGPoint:self.lastNodeTouched.position];
+    anim.fromValue = [NSValue valueWithCGPoint:self.lastNodeTouched.center];
     anim.toValue = [NSValue valueWithCGPoint: newPosition];
     anim.springBounciness = 5;
     anim.springSpeed = 20;
@@ -193,9 +210,9 @@
     sizeAnim.toValue = [NSValue valueWithCGSize:CGSizeMake(UIScreen.mainScreen.bounds.size.width, [self proportionateHeightForImage:_lastNodeTouched.image])];
     sizeAnim.springBounciness = 5;
     sizeAnim.springSpeed = 20;
-    
-    POPBasicAnimation *cornerAnim = [POPBasicAnimation animationWithPropertyNamed:kPOPLayerCornerRadius];
-    cornerAnim.toValue = @(0);
+//    
+//    POPBasicAnimation *cornerAnim = [POPBasicAnimation animationWithPropertyNamed:kPOPLayerCornerRadius];
+//    cornerAnim.toValue = @(0);
     
     void (^completion)(POPAnimation *anim, BOOL completed) = ^(POPAnimation *anim, BOOL completed){
         
@@ -205,7 +222,7 @@
             NSInteger index = [[self imageNodes] indexOfObject:self.lastNodeTouched];
             [self presentFullScreenImageGalleryStartingAtIndex:index];
             
-            self.lastNodeTouched.cornerRadius = 4;
+//            self.lastNodeTouched.layer.cornerRadius = 4;
             self.lastNodeTouched.frame = self.lastNodeTouchedFrame;
             self.hiddenNode = self.lastNodeTouched;
             self.hiddenNode.hidden = YES;
@@ -221,12 +238,12 @@
     
     anim.completionBlock = completion;
     sizeAnim.completionBlock = completion;
-    cornerAnim.completionBlock = completion;
+//    cornerAnim.completionBlock = completion;
     
     [_darkBackground pop_addAnimation:alphaAnim forKey:nil];
-    [self.lastNodeTouched pop_addAnimation:sizeAnim forKey:nil];
-    [self.lastNodeTouched pop_addAnimation:anim forKey:nil];
-    [self.lastNodeTouched pop_addAnimation:cornerAnim forKey:nil];
+    [self.lastNodeTouched.layer pop_addAnimation:sizeAnim forKey:nil];
+    [self.lastNodeTouched.layer pop_addAnimation:anim forKey:nil];
+//    [self.lastNodeTouched.layer pop_addAnimation:cornerAnim forKey:nil];
 }
 
 - (void)presentFullScreenImageGalleryStartingAtIndex:(NSInteger)index;
@@ -307,45 +324,45 @@
 
 - (void)removeAnimationsFromNodes;
 {
-    for (ASDisplayNode *node in self.imageNodes) {
-        [node.view pop_removeAllAnimations];
+    for (UIImageView *node in self.imageNodes) {
+        [node pop_removeAllAnimations];
     }
 }
 
 - (void)moveAllNodesHorizontallyByDifference;
 {
-    ASDisplayNode *firstNode = (ASDisplayNode *)self.imageNodes[0];
-    ASDisplayNode *lastNode = (ASDisplayNode *)self.imageNodes.lastObject;
+    UIImageView *firstNode = (UIImageView *)self.imageNodes[0];
+    UIImageView *lastNode = (UIImageView *)self.imageNodes.lastObject;
     CGFloat sweetSpotXValue = self.frame.size.width - lastNode.frame.size.width;
     
     if ( !(firstNode.frame.origin.x > 50 || lastNode.frame.origin.x < sweetSpotXValue) ) {
-        for (ASDisplayNode *node in self.imageNodes) {
-            CGPoint newCenter = CGPointMake((node.view.center.x + _difference), node.view.center.y);
-            node.view.center = newCenter;
+        for (UIImageView *node in self.imageNodes) {
+            CGPoint newCenter = CGPointMake((node.center.x + _difference), node.center.y);
+            node.center = newCenter;
         }
     } else {
-        for (ASDisplayNode *node in self.imageNodes) {
-            CGPoint newCenter = CGPointMake((node.view.center.x + (_difference/2)), node.view.center.y);
-            node.view.center = newCenter;
+        for (UIImageView *node in self.imageNodes) {
+            CGPoint newCenter = CGPointMake((node.center.x + (_difference/2)), node.center.y);
+            node.center = newCenter;
         }
     }
 }
 
 - (void)addDecayAnimationToAllSubviewsWithVelocity:(CGFloat)xVelocity;
 {
-    for (ASDisplayNode *node in self.imageNodes) {
+    for (UIImageView *node in self.imageNodes) {
         POPDecayAnimation *decay = [POPDecayAnimation animationWithPropertyNamed:kPOPViewCenter];
     
-        decay.fromValue = [NSValue valueWithCGPoint:node.view.center];
+        decay.fromValue = [NSValue valueWithCGPoint:node.center];
         decay.velocity = [NSValue valueWithCGPoint:CGPointMake(xVelocity, 0)];
         decay.delegate = self;
         
         if ([self.imageNodes indexOfObject:node] == 0) {
-            [node.view pop_addAnimation:decay forKey:@"firstNodeScroll"];
+            [node pop_addAnimation:decay forKey:@"firstNodeScroll"];
         } else if ([self.imageNodes indexOfObject:node] == self.imageNodes.count - 1) {
-            [node.view pop_addAnimation:decay forKey:@"lastNodeScroll"];
+            [node pop_addAnimation:decay forKey:@"lastNodeScroll"];
         } else {
-            [node.view pop_addAnimation:decay forKey:@"scroll"];
+            [node pop_addAnimation:decay forKey:@"scroll"];
         }
     }
 }
@@ -395,9 +412,9 @@
                 CGFloat xDifference = [pan locationInView:self.view].x - _previousTouchLocation.x;
                 CGFloat yDifference = [pan locationInView:self.view].y - _previousTouchLocation.y;
                 
-                CGPoint newImageCenter = CGPointMake(self.lastNodeTouched.view.center.x + xDifference, self.lastNodeTouched.view.center.y + yDifference);
+                CGPoint newImageCenter = CGPointMake(self.lastNodeTouched.center.x + xDifference, self.lastNodeTouched.center.y + yDifference);
                 
-                self.lastNodeTouched.view.center = newImageCenter;
+                self.lastNodeTouched.center = newImageCenter;
                 _previousTouchLocation = [pan locationInView:self.view];
             } else {
                 _newX = [pan locationInView:self.view].x;
@@ -417,7 +434,7 @@
                     //if isFullscreen is YES then change it to NO and animate back to the small screen
                     //if isFullscreen is NO then change it to YES and animate the card you touched on the initial pan to be the full screen view
                 
-                CGFloat rightSide = (self.frame.size.width - ((ASNetworkImageNode *)self.imageNodes[self.imageNodes.count-1]).frame.size.width);
+                CGFloat rightSide = (self.frame.size.width - ((UIImageView *)self.imageNodes[self.imageNodes.count-1]).frame.size.width);
                 CGFloat lastX = ((ASDisplayNode *)self.imageNodes[self.imageNodes.count-1]).frame.origin.x;
             
     //            NSLog(@"The last images X origin is %f", lastX);
@@ -448,10 +465,10 @@
 - (void)animateGalleryBackToStartOrEndingIfNecessary
 {
     CGPoint finalPoint = [((NSValue *)self.finalCenters.lastObject) CGPointValue];
-    ASNetworkImageNode *finalNode = self.imageNodes.lastObject;
+    UIImageView *finalNode = self.imageNodes.lastObject;
     CGFloat smallestXValue = finalPoint.x - (finalNode.frame.size.width/2);
     
-    ASNetworkImageNode *firstNode = self.imageNodes.firstObject;
+    UIImageView *firstNode = self.imageNodes.firstObject;
     
     if (finalNode.frame.origin.x < smallestXValue) {
         [self animateViewsBackToEndingPosition];

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AE096E261A8E987E00C2510B /* car.jpg in Resources */ = {isa = PBXBuildFile; fileRef = AE096E251A8E987E00C2510B /* car.jpg */; };
 		AECC986D1A7C05B3009D867E /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = AECC986C1A7C05B3009D867E /* main.m */; };
 		AECC98701A7C05B3009D867E /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = AECC986F1A7C05B3009D867E /* AppDelegate.m */; };
 		AECC98731A7C05B3009D867E /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AECC98721A7C05B3009D867E /* ViewController.m */; };
@@ -33,6 +34,7 @@
 /* Begin PBXFileReference section */
 		2683013D4864234F0210038F /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
 		32BED178AA40697B2E144DAA /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
+		AE096E251A8E987E00C2510B /* car.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = car.jpg; sourceTree = "<group>"; };
 		AECC98671A7C05B3009D867E /* ImageGallerySpike.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ImageGallerySpike.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AECC986B1A7C05B3009D867E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AECC986C1A7C05B3009D867E /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -120,6 +122,7 @@
 				AECC98721A7C05B3009D867E /* ViewController.m */,
 				AECC98931A7C346D009D867E /* ImageGalleryNode.h */,
 				AECC98941A7C346D009D867E /* ImageGalleryNode.m */,
+				AE096E251A8E987E00C2510B /* car.jpg */,
 				AEFD797E1A83E3B2004659C3 /* FullScreenImageGalleryNode.h */,
 				AEFD797F1A83E3B3004659C3 /* FullScreenImageGalleryNode.m */,
 				AECC98741A7C05B3009D867E /* Main.storyboard */,
@@ -240,6 +243,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AE096E261A8E987E00C2510B /* car.jpg in Resources */,
 				AECC98761A7C05B3009D867E /* Main.storyboard in Resources */,
 				AECC987B1A7C05B3009D867E /* LaunchScreen.xib in Resources */,
 				AECC98781A7C05B3009D867E /* Images.xcassets in Resources */,
