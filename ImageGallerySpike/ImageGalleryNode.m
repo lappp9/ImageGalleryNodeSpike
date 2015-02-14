@@ -117,6 +117,7 @@
         imageNode.view.userInteractionEnabled = YES;
         imageNode.contentMode = UIViewContentModeScaleAspectFill;
         imageNode.defaultImage = [UIImage imageNamed:@"cat"];
+        imageNode.cropEnabled = NO;
 
         [imageNode addTarget:self action:@selector(imageTouchedDown:) forControlEvents:ASControlNodeEventTouchDown];
         [imageNode addTarget:self action:@selector(imageTouchedUpInside:) forControlEvents:ASControlNodeEventTouchUpInside];
