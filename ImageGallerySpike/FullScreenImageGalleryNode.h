@@ -12,6 +12,9 @@
 @property (nonatomic) CGRect frameToWhichToAnimateBack;
 @property (nonatomic) CGSize sizeToAnimateBackTo;
 @property (nonatomic) CGPoint positionToAnimateBackTo;
+@property (nonatomic) NSMutableArray *imageNodes;
+
+- (instancetype)initWithImages:(NSArray *)images;
 
 - (instancetype)initWithImageUrls:(NSArray *)imageUrls;
 

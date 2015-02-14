@@ -3,55 +3,68 @@
 
 @interface FullScreenImageGalleryNode ()
 @property (nonatomic) NSArray *imageUrls;
-@property (nonatomic) NSMutableArray *imageNodes;
-@property (nonatomic) NSMutableArray *images;
-
 @property (nonatomic) BOOL isPanningVertically;
-@property (nonatomic) ASNetworkImageNode *currentImageNode;
+@property (nonatomic) ASImageNode *currentImageNode;
 @property (nonatomic) CGPoint previousTouchLocation;
 @end
 
 @implementation FullScreenImageGalleryNode
 
-- (instancetype)initWithImageUrls:(NSArray *)imageUrls;
+
+- (instancetype)initWithImages:(NSArray *)images;
 {
     if (!(self = [super init])) { return nil; }
     
-    self.imageUrls = imageUrls;
     self.imageNodes = @[].mutableCopy;
     
-    for (NSInteger i = 0; i < self.imageUrls.count; i++) {
-        ASNetworkImageNode *node = [[ASNetworkImageNode alloc] init];
+    for (NSInteger i = 0; i < images.count; i++) {
+        ASImageNode *node = [[ASImageNode alloc] init];
+        node.image = images[i];
         node.view.userInteractionEnabled = YES;
-        node.defaultImage = [UIImage imageNamed:@"cat"];
-        node.delegate = self;
         node.clipsToBounds = YES;
-
         node.contentMode = UIViewContentModeScaleAspectFill;
-        node.URL = self.imageUrls[i];
-
-        node.frame = CGRectMake(0, 0, UIScreen.mainScreen.bounds.size.width, 200);
+        node.frame = CGRectMake(0, 0, UIScreen.mainScreen.bounds.size.width, [self proportionateHeightForImage:images[i]]);
         node.placeholderColor = [UIColor orangeColor];
-
+        
         self.imageNodes[i] = node;
     }
     
     UIPanGestureRecognizer *pan = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(galleryDidPan:)];
     [self.view addGestureRecognizer:pan];
-    
     return self;
 }
-
-- (void)imageNode:(ASNetworkImageNode *)imageNode didLoadImage:(UIImage *)image;
-{
-    imageNode.frame = CGRectMake(0, 0, UIScreen.mainScreen.bounds.size.width, [self proportionateHeightForImage:image]);
-    imageNode.position = self.view.center;
-}
+//
+//- (instancetype)initWithImageUrls:(NSArray *)imageUrls;
+//{
+//    if (!(self = [super init])) { return nil; }
+//    
+//    self.imageUrls = imageUrls;
+//    self.imageNodes = @[].mutableCopy;
+//    
+//    for (NSInteger i = 0; i < self.imageUrls.count; i++) {
+//        ASNetworkImageNode *node = [[ASNetworkImageNode alloc] init];
+//        node.view.userInteractionEnabled = YES;
+//        node.defaultImage = [UIImage imageNamed:@"cat"];
+//        node.delegate = self;
+//        node.clipsToBounds = YES;
+//
+//        node.contentMode = UIViewContentModeScaleAspectFill;
+//        node.URL = self.imageUrls[i];
+//
+//        node.frame = CGRectMake(0, 0, UIScreen.mainScreen.bounds.size.width, 200);
+//        node.placeholderColor = [UIColor orangeColor];
+//
+//        self.imageNodes[i] = node;
+//    }
+//    
+//    UIPanGestureRecognizer *pan = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(galleryDidPan:)];
+//    [self.view addGestureRecognizer:pan];
+//    
+//    return self;
+//}
 
 - (CGFloat)proportionateHeightForImage:(UIImage *)image;
 {
-    NSLog(@"\n Image: %@", image);
-    
     return (UIScreen.mainScreen.bounds.size.width * image.size.height)/image.size.width;
 }
 
@@ -172,7 +185,7 @@
     [self.currentImageNode.layer pop_addAnimation:cornerAnim forKey:nil];
     [self.currentImageNode.layer pop_addAnimation:sizeAnim forKey:nil];
     
-    }
+}
 
 - (void)showAtIndex:(NSInteger)index;
 {
@@ -180,7 +193,7 @@
     //three frame positions at a time?
     self.hidden = NO;
     self.backgroundColor = [UIColor blackColor];
-    ASNetworkImageNode *node = (ASNetworkImageNode *)self.imageNodes[index];
+    ASImageNode *node = (ASImageNode *)self.imageNodes[index];
     node.position = self.view.center;
 
     self.currentImageNode = node;

@@ -58,19 +58,6 @@
  
     -- add pinching to resize image and rotate at any given time
  
-    -- right now the image you see that the small one animates to is zoomed in further than the full screen image that is shown when it transfers
-       to the fullscreen view.  To fix that I'll try a few things.  
-        OPTION 1:  Start each image at teh full size then scale down so maybe it will have the same focus when scaled back up.
-        OPTION 2: If that doesn't work, make the image node's size the correct proportions from the beginning.  Then make it a subview of 
-                  some other view that is sized to the correct size in the small gallery, that way the image's focus shouldn't be affected
- 
-    -- Right now the fullscreen gallery is re-downloading all the images from the same URL's.  That's dumb, just pass along all the images upon it's creation,
-       then implement the network image node delegate method for when images load in this class, and when each one is loaded update the image that is in the 
-       fullscreen gallery.  
- 
-    -- Wait, maybe just make a datasource method for the Full screen image gallery node called image at index .... wait no, that shouldn't work because then
-       how would it update?  First idea is better.  The full screen gallery should just have ASImageNodes not network image nodes.
- 
     -- Eventually it needs to let you swipe left and right in fullscreen mode.  When this happens this class should change which image is hidden and
        shift all the nodes to the left or right by one imagenodes width
  
@@ -106,6 +93,7 @@
         CGFloat imageNodeHeight = self.bounds.size.height;
         
         ASNetworkImageNode *imageNode = [[ASNetworkImageNode alloc] init];
+        imageNode.delegate = self;
 
         imageNode.backgroundColor = [UIColor lightGrayColor];
         imageNode.URL = [self.dataSource imageGallery:self urlForImageAtIndex:i];
@@ -128,7 +116,15 @@
     }
     
     if ([self.delegate imageGalleryShouldAllowFullScreenMode]) {
-        self.fullScreenImageGalleryNode = [[FullScreenImageGalleryNode alloc] initWithImageUrls:self.imageUrls];
+        
+        NSMutableArray *images = @[].mutableCopy;
+        
+        for (ASNetworkImageNode *imageNode in self.imageNodes) {
+            [images addObject:imageNode.image];
+        }
+        
+        self.fullScreenImageGalleryNode = [[FullScreenImageGalleryNode alloc] initWithImages:images];
+//        self.fullScreenImageGalleryNode = [[FullScreenImageGalleryNode alloc] initWithImageUrls:self.imageUrls];
         
         self.fullScreenImageGalleryNode.delegate = self;
         self.fullScreenImageGalleryNode.frame = CGRectMake(0, 0, self.view.superview.frame.size.width, self.view.superview.frame.size.height);
@@ -538,13 +534,21 @@
     self.hiddenNode.hidden = NO;
 }
 
+#pragma mark ASNetworkImageNode Delegate
+
+- (void)imageNode:(ASNetworkImageNode *)imageNode didLoadImage:(UIImage *)image;
+{
+    NSInteger i = [self.imageNodes indexOfObject:imageNode];
+    ((ASImageNode *)self.fullScreenImageGalleryNode.imageNodes[i]).image = image;
+    ((ASImageNode *)self.fullScreenImageGalleryNode.imageNodes[i]).frame = CGRectMake(0, 0, UIScreen.mainScreen.bounds.size.width, [self proportionateHeightForImage:image]);
+}
+
 #pragma mark Utilities
 
 - (CGFloat)proportionateHeightForImage:(UIImage *)image;
 {
-    NSLog(@"\n Image: %@", image);
-    
     return (UIScreen.mainScreen.bounds.size.width * image.size.height)/image.size.width;
 }
+
 
 @end
