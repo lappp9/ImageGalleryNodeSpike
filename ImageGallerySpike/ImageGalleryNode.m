@@ -3,50 +3,29 @@
 
 @interface ImageGalleryNode ()<POPAnimationDelegate, UIGestureRecognizerDelegate>
 @property (nonatomic) NSMutableArray *imageNodes;
-@property (nonatomic) NSMutableArray *imageUrls;
-
 @property (nonatomic) FullScreenImageGalleryNode *fullScreenImageGalleryNode;
 
 @property (nonatomic) CGFloat touchXPosition;
-@property (nonatomic) CGFloat touchYPosition;
 @property (nonatomic) CGFloat newX;
-@property (nonatomic) CGFloat newY;
-@property (nonatomic) CGPoint oldTouch;
 @property (nonatomic) CGPoint previousTouchLocation;
 
 @property (nonatomic) CGFloat difference;
 
-//when hitting an edge, you can just animte all the views back to their initial or ending places
 @property (nonatomic) NSMutableArray *initialCenters;
 @property (nonatomic) NSMutableArray *finalCenters;
 
-//tracking the state of the subviews
 @property (nonatomic) BOOL isPanningVertically;
-@property (nonatomic) BOOL isFullScreen;
-@property (nonatomic) CGRect fullScreenFrame;
-@property (nonatomic) ASDisplayNode *touchedNode;
-@property (nonatomic) SwipeGestureDirection direction;
-
-//keep this around to go back to small view
-@property (nonatomic) CGRect initialFrame;
+@property (nonatomic) BOOL shouldGoIntoFullscreen;
 
 @property (nonatomic) ASNetworkImageNode *hiddenNode;
 @property (nonatomic) ASNetworkImageNode *lastNodeTouched;
+
 @property (nonatomic) CGRect lastNodeTouchedFrame;
 @property (nonatomic) CGSize lastNodeTouchedSize;
 @property (nonatomic) CGPoint lastNodeTouchedPosition;
 
 @property (nonatomic) ASDisplayNode *darkBackground;
 
-//maybe i should be keeping track of the frame of every subview in small mode
-//then in large mode i can update these views in the back ground based on you swiping around
-//that way when you go back into small mode i can just animate all these subviews to the appropriate place
-
-// after the pan upward has stopped
-// animate all views sizes to full screen
-// figure out how far the view you touched is from the center and animate all views that many points in that direction
-
-//do i need to keep arrays of all the frames?
 @end
 
 @implementation ImageGalleryNode
@@ -76,6 +55,14 @@
     }
 }
 
+- (void)didLoad;
+{
+    [super didLoad];
+    
+    UIPanGestureRecognizer *pan = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(galleryDidPan:)];
+    [self.view addGestureRecognizer:pan];
+}
+
 - (void)layout;
 {
     [super layout];
@@ -95,9 +82,7 @@
         ASNetworkImageNode *imageNode = [[ASNetworkImageNode alloc] init];
         imageNode.delegate = self;
 
-        imageNode.backgroundColor = [UIColor lightGrayColor];
         imageNode.URL = [self.dataSource imageGallery:self urlForImageAtIndex:i];
-        self.imageUrls[i] = [self.dataSource imageGallery:self urlForImageAtIndex:i];
         
         imageNode.frame = CGRectMake(((i * imageNodeWidth) + (i * 4)), 0, imageNodeWidth, imageNodeHeight);
         imageNode.cornerRadius = 4;
@@ -124,7 +109,6 @@
         }
         
         self.fullScreenImageGalleryNode = [[FullScreenImageGalleryNode alloc] initWithImages:images];
-//        self.fullScreenImageGalleryNode = [[FullScreenImageGalleryNode alloc] initWithImageUrls:self.imageUrls];
         
         self.fullScreenImageGalleryNode.delegate = self;
         self.fullScreenImageGalleryNode.frame = CGRectMake(0, 0, self.view.superview.frame.size.width, self.view.superview.frame.size.height);
@@ -138,15 +122,15 @@
     }
     
     [self calculateFinalCenters];
-    
-    UIPanGestureRecognizer *pan = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(galleryDidPan:)];
-    [self.view addGestureRecognizer:pan];
 }
 
 - (void)imageTouchedDown:(ASNetworkImageNode *)imageNode;
 {
     if ([[imageNode.view pop_animationKeys] containsObject:@"scroll"] || [[imageNode.view pop_animationKeys] containsObject:@"firstNodeScroll"] || [[imageNode.view pop_animationKeys] containsObject:@"lastNodeScroll"]) {
         [self removeAnimationsFromNodes];
+        _shouldGoIntoFullscreen = NO;
+    } else {
+        _shouldGoIntoFullscreen = YES;
     }
     
     [self.view bringSubviewToFront:imageNode.view];
@@ -159,15 +143,13 @@
 
 - (void)imageTouchedUpInside:(ASNetworkImageNode *)imageNode;
 {
-    [self animateIntoFullScreenMode];
+    if (_shouldGoIntoFullscreen) {
+        [self animateIntoFullScreenMode];
+    } 
 }
 
 - (void)animateIntoFullScreenMode;
 {
-    NSLog(@"\n\n\nThe image's width is animating from %f and height is animating from %f\n\n\n", self.lastNodeTouchedFrame.size.width, self.lastNodeTouchedFrame.size.height);
-    
-    NSLog(@"\n\n\nThe image's width is animating to %f and height is animating to %f\n\n\n", UIScreen.mainScreen.bounds.size.width, [self proportionateHeightForImage:_lastNodeTouched.image]);
-
     self.lastNodeTouched.zPosition = 3;
     [self.view bringSubviewToFront:self.lastNodeTouched.view];
     
@@ -201,21 +183,25 @@
         }
     };
     
+    anim.completionBlock = completion;
+    sizeAnim.completionBlock = completion;
+    cornerAnim.completionBlock = completion;
+
+    [self.lastNodeTouched pop_addAnimation:sizeAnim forKey:nil];
+    [self.lastNodeTouched pop_addAnimation:anim forKey:nil];
+    [self.lastNodeTouched pop_addAnimation:cornerAnim forKey:nil];
+    [self fadeInDarkBackground];
+}
+
+- (void)fadeInDarkBackground;
+{
     POPBasicAnimation *alphaAnim = [POPBasicAnimation animationWithPropertyNamed:kPOPViewAlpha];
     alphaAnim.fromValue = @(0.0);
     alphaAnim.toValue = @(1.0);
     alphaAnim.completionBlock = ^(POPAnimation *anim, BOOL completed) {
         self.darkBackground.alpha = 0.0;
     };
-    
-    anim.completionBlock = completion;
-    sizeAnim.completionBlock = completion;
-    cornerAnim.completionBlock = completion;
-    
     [_darkBackground pop_addAnimation:alphaAnim forKey:nil];
-    [self.lastNodeTouched pop_addAnimation:sizeAnim forKey:nil];
-    [self.lastNodeTouched pop_addAnimation:anim forKey:nil];
-    [self.lastNodeTouched pop_addAnimation:cornerAnim forKey:nil];
 }
 
 - (void)presentFullScreenImageGalleryStartingAtIndex:(NSInteger)index;
@@ -228,24 +214,22 @@
 
 - (void)setupInitialState
 {
-    self.imageUrls = @[].mutableCopy;
-    self.imageNodes = @[].mutableCopy;
-    self.initialCenters = @[].mutableCopy;
-    self.finalCenters = @[].mutableCopy;
-    _fullScreenFrame = CGRectMake(0, 0, self.view.superview.bounds.size.width, self.view.superview.bounds.size.height);
-    self.backgroundColor = [UIColor darkGrayColor];
-    _initialFrame = self.frame;
-    self.clipsToBounds = NO;
+    _imageNodes      = @[].mutableCopy;
+    _initialCenters  = @[].mutableCopy;
+    _finalCenters    = @[].mutableCopy;
     
-    CGSize screenSize = [[UIScreen mainScreen] bounds].size;
+    self.clipsToBounds   = NO;
+    self.backgroundColor = [UIColor darkGrayColor];
+    
+    CGSize screenSize      = [[UIScreen mainScreen] bounds].size;
     CGRect fullscreenFrame = [self.view.superview convertRect:CGRectMake(0, 0, screenSize.width, screenSize.height) toView:self.view];
 
-    _darkBackground = [[ASDisplayNode alloc] init];
+    _darkBackground                 = [[ASDisplayNode alloc] init];
     _darkBackground.backgroundColor = [UIColor blackColor];
-    _darkBackground.layerBacked = YES;
-    _darkBackground.frame = fullscreenFrame;
-    _darkBackground.zPosition = 2;
-    _darkBackground.alpha = 0.0;
+    _darkBackground.layerBacked     = YES;
+    _darkBackground.frame           = fullscreenFrame;
+    _darkBackground.zPosition       = 2;
+    _darkBackground.alpha           = 0.0;
     
     [self addSubnode:_darkBackground];
 }
@@ -341,11 +325,6 @@
     }
 }
 
-- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event;
-{
-    [self removeAnimationsFromNodes];
-}
-
 - (void)galleryDidPan:(UIPanGestureRecognizer *)pan;
 {
     CGPoint vel = [pan velocityInView:self.view];
@@ -353,29 +332,24 @@
     switch (pan.state) {
         case UIGestureRecognizerStateBegan:
             [self removeAnimationsFromNodes];
-            //set up the bool values for what direction this pan is going
+
             if (abs(vel.y) > abs(vel.x)){
                 
                 _isPanningVertically = YES;
                 _previousTouchLocation = [pan locationInView:self.view];
-                _oldTouch = [pan locationInView:self.view];
                 
                 if (vel.y > 0) {
-                    self.direction = SwipeGestureDirectionDown;
                     NSLog(@"DOWN!! at %f velocity", vel.y);
                 } else {
                     NSLog(@"UP!! at %f velocity", vel.y);
-                    self.direction = SwipeGestureDirectionUp;
                 }
             } else {
                 _isPanningVertically = NO;
                 if (vel.x > 0) {
                     NSLog(@"RIGHT!! at %f velocity", vel.x);
-                    self.direction = SwipeGestureDirectionRight;
 
                 } else {
                     NSLog(@"LEFT!! at %f velocity", vel.x);
-                    self.direction = SwipeGestureDirectionLeft;
                 }
             }
             self.touchXPosition = [pan locationInView:self.view].x;
@@ -385,7 +359,6 @@
                 
                 CGFloat xDifference = [pan locationInView:self.view].x - _previousTouchLocation.x;
                 CGFloat yDifference = [pan locationInView:self.view].y - _previousTouchLocation.y;
-                
                 CGPoint newImageCenter = CGPointMake(self.lastNodeTouched.view.center.x + xDifference, self.lastNodeTouched.view.center.y + yDifference);
                 
                 self.lastNodeTouched.view.center = newImageCenter;
@@ -399,27 +372,14 @@
             break;
         case UIGestureRecognizerStateEnded:
             if (_isPanningVertically) {
-                if (!_isFullScreen) {
-                    [self animateIntoFullScreenMode];
-                }
+                [self animateIntoFullScreenMode];
             } else {
-            
-                //when you were panning vertically,
-                    //if isFullscreen is YES then change it to NO and animate back to the small screen
-                    //if isFullscreen is NO then change it to YES and animate the card you touched on the initial pan to be the full screen view
-                
                 CGFloat rightSide = (self.frame.size.width - ((ASNetworkImageNode *)self.imageNodes[self.imageNodes.count-1]).frame.size.width);
                 CGFloat lastX = ((ASDisplayNode *)self.imageNodes[self.imageNodes.count-1]).frame.origin.x;
             
-    //            NSLog(@"The last images X origin is %f", lastX);
-                //when you were panning horizontally, add a decay animation to scroll and make sure to watch out for the edges
                 if (((ASDisplayNode *)self.imageNodes[0]).frame.origin.x > 1) {
                     [self animateViewsBackToStartingPosition];
                 } else if (lastX >= 0 && lastX < rightSide + 1) {
-    //            } else if (((ASDisplayNode *)self.imageNodes[self.imageNodes.count-1]).frame.origin.x < 130) {
-                    
-                    // origin.x distance from the right side
-                    //if the last image's frame.origin.x is between 0 self.view.width - node.view.width
                     [self animateViewsBackToEndingPosition];
                 } else {
                     [self addDecayAnimationToAllSubviewsWithVelocity:[pan velocityInView:self.view].x];
@@ -427,7 +387,6 @@
             }
             
             _isPanningVertically = NO;
-
             break;
         default:
             break;
@@ -513,8 +472,6 @@
 
 - (void)fullScreenImageGalleryDidAdvance;
 {
-    //change which small image is hidden
-    //
     NSLog(@"The fullscreen gallery moved forward so move the small one to the right\n then update where the image should animate back to when its all done");
 }
 
@@ -543,6 +500,5 @@
 {
     return (UIScreen.mainScreen.bounds.size.width * image.size.height)/image.size.width;
 }
-
 
 @end

@@ -9,13 +9,6 @@
 @protocol ImageGalleryDatasource;
 @protocol ImageGalleryDelegate;
 
-typedef NS_ENUM(NSInteger, SwipeGestureDirection) {
-    SwipeGestureDirectionUp,
-    SwipeGestureDirectionDown,
-    SwipeGestureDirectionLeft,
-    SwipeGestureDirectionRight
-};
-
 @interface ImageGalleryNode : ASDisplayNode <POPAnimationDelegate, FullScreenImageGalleryDelegate, ASNetworkImageNodeDelegate>
 
 @property (weak) id <ImageGalleryDatasource> dataSource;

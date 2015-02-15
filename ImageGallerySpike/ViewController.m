@@ -19,7 +19,6 @@
     imageGallery.cornerRadius = 4;
     imageGallery.dataSource = self;
     imageGallery.delegate = self;
-    imageGallery.backgroundColor = [UIColor clearColor];
 
     [self.view addSubview:imageGallery.view];
 }

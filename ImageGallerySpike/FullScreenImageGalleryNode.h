@@ -6,7 +6,7 @@
 
 @protocol FullScreenImageGalleryDelegate;
 
-@interface FullScreenImageGalleryNode : ASDisplayNode <ASNetworkImageNodeDelegate>
+@interface FullScreenImageGalleryNode : ASDisplayNode
 
 @property (weak) id <FullScreenImageGalleryDelegate> delegate;
 @property (nonatomic) CGRect frameToWhichToAnimateBack;
@@ -15,8 +15,6 @@
 @property (nonatomic) NSMutableArray *imageNodes;
 
 - (instancetype)initWithImages:(NSArray *)images;
-
-- (instancetype)initWithImageUrls:(NSArray *)imageUrls;
 
 - (void)hide;
 - (void)showAtIndex:(NSInteger)index;

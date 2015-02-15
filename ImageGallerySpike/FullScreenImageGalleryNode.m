@@ -2,7 +2,6 @@
 #import "FullScreenImageGalleryNode.h"
 
 @interface FullScreenImageGalleryNode ()
-@property (nonatomic) NSArray *imageUrls;
 @property (nonatomic) BOOL isPanningVertically;
 @property (nonatomic) ASImageNode *currentImageNode;
 @property (nonatomic) CGPoint previousTouchLocation;
