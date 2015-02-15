@@ -168,13 +168,7 @@
     
     NSLog(@"\n\n\nThe image's width is animating to %f and height is animating to %f\n\n\n", UIScreen.mainScreen.bounds.size.width, [self proportionateHeightForImage:_lastNodeTouched.image]);
 
-    
-    //add full screen view as subview of our view
-    //use handy conversion to get it to cover the screen
-    //animate a fade of it's darkness from 0 to 1
-    //remove it from the view when its done
-
-    [self.view bringSubviewToFront:self.darkBackground.view];
+    self.lastNodeTouched.zPosition = 3;
     [self.view bringSubviewToFront:self.lastNodeTouched.view];
     
     CGPoint centerOfScreen = CGPointMake(UIScreen.mainScreen.bounds.size.width/2, UIScreen.mainScreen.bounds.size.height/2);
@@ -195,9 +189,6 @@
     cornerAnim.toValue = @(0);
     
     void (^completion)(POPAnimation *anim, BOOL completed) = ^(POPAnimation *anim, BOOL completed){
-        
-        
-        
         if (completed) {
             NSInteger index = [[self imageNodes] indexOfObject:self.lastNodeTouched];
             [self presentFullScreenImageGalleryStartingAtIndex:index];
@@ -206,6 +197,7 @@
             self.lastNodeTouched.frame = self.lastNodeTouchedFrame;
             self.hiddenNode = self.lastNodeTouched;
             self.hiddenNode.hidden = YES;
+            self.lastNodeTouched.zPosition = 1;
         }
     };
     
@@ -229,7 +221,7 @@
 - (void)presentFullScreenImageGalleryStartingAtIndex:(NSInteger)index;
 {
     self.fullScreenImageGalleryNode.sizeToAnimateBackTo     = self.lastNodeTouchedSize;
-    self.fullScreenImageGalleryNode.positionToAnimateBackTo =  [self.view convertPoint:self.lastNodeTouchedPosition toView:self.view.superview];;
+    self.fullScreenImageGalleryNode.positionToAnimateBackTo =  [self.view convertPoint:self.lastNodeTouchedPosition toView:self.view.superview];
     
     [self.fullScreenImageGalleryNode showAtIndex:index];
 }
@@ -250,7 +242,9 @@
 
     _darkBackground = [[ASDisplayNode alloc] init];
     _darkBackground.backgroundColor = [UIColor blackColor];
+    _darkBackground.layerBacked = YES;
     _darkBackground.frame = fullscreenFrame;
+    _darkBackground.zPosition = 2;
     _darkBackground.alpha = 0.0;
     
     [self addSubnode:_darkBackground];
