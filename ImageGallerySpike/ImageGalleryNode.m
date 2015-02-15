@@ -82,21 +82,21 @@
         ASNetworkImageNode *imageNode = [[ASNetworkImageNode alloc] init];
         imageNode.delegate = self;
 
-        imageNode.URL = [self.dataSource imageGallery:self urlForImageAtIndex:i];
-        
-        imageNode.frame = CGRectMake(((i * imageNodeWidth) + (i * 4)), 0, imageNodeWidth, imageNodeHeight);
-        imageNode.cornerRadius = 4;
-        imageNode.clipsToBounds = YES;
-        imageNode.view.userInteractionEnabled = YES;
-        imageNode.contentMode = UIViewContentModeScaleAspectFill;
-        imageNode.defaultImage = [UIImage imageNamed:@"cat"];
-        imageNode.cropEnabled = NO;
+        imageNode.URL                    = [self.dataSource imageGallery:self urlForImageAtIndex:i];
+        imageNode.frame                  = CGRectMake(((i * imageNodeWidth) + (i * 4)), 0, imageNodeWidth, imageNodeHeight);
+        imageNode.cornerRadius           = 4;
+        imageNode.clipsToBounds          = YES;
+        imageNode.userInteractionEnabled = YES;
+        imageNode.contentMode            = UIViewContentModeScaleAspectFill;
+        imageNode.defaultImage           = [UIImage imageNamed:@"cat"];
+        imageNode.cropEnabled            = NO;
 
         [imageNode addTarget:self action:@selector(imageTouchedDown:) forControlEvents:ASControlNodeEventTouchDown];
         [imageNode addTarget:self action:@selector(imageTouchedUpInside:) forControlEvents:ASControlNodeEventTouchUpInside];
         
         self.initialCenters[i] = [NSValue valueWithCGPoint:imageNode.view.center];
-        self.imageNodes[i] = imageNode;
+        self.imageNodes[i]     = imageNode;
+        
         [self addSubnode:imageNode];
     }
     
@@ -145,7 +145,7 @@
 {
     if (_shouldGoIntoFullscreen) {
         [self animateIntoFullScreenMode];
-    } 
+    }
 }
 
 - (void)animateIntoFullScreenMode;
