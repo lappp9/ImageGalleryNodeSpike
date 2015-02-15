@@ -2,9 +2,20 @@
 #import "FullScreenImageGalleryNode.h"
 
 @interface FullScreenImageGalleryNode ()
+
+typedef NS_ENUM(NSInteger, HorizontalScrollDirection) {
+    HorizontalScrollDirectionLeft,
+    HorizontalScrollDirectionRight
+};
+
 @property (nonatomic) BOOL isPanningVertically;
 @property (nonatomic) ASImageNode *currentImageNode;
 @property (nonatomic) CGPoint previousTouchLocation;
+@property (nonatomic) CGFloat difference;
+
+@property (nonatomic) CGFloat previousTouchXPosition;
+@property (nonatomic) HorizontalScrollDirection horizontalScrollDirection;
+
 @end
 
 @implementation FullScreenImageGalleryNode
@@ -52,8 +63,21 @@
                 _isPanningVertically = YES;
                 self.backgroundColor = [UIColor clearColor];
                 _previousTouchLocation = [pan locationInView:self.view];
+                if (vel.y > 0) {
+                    NSLog(@"DOWN!! at %f velocity", vel.y);
+                } else {
+                    NSLog(@"UP!! at %f velocity", vel.y);
+                }
             } else {
                 _isPanningVertically = NO;
+                _previousTouchXPosition = [pan locationInView:self.view].x;
+                if (vel.x > 0) {
+                    NSLog(@"RIGHT!! at %f velocity", vel.x);
+                    _horizontalScrollDirection = HorizontalScrollDirectionRight;
+                } else {
+                    NSLog(@"LEFT!! at %f velocity", vel.x);
+                    _horizontalScrollDirection = HorizontalScrollDirectionLeft;
+                }
             }
             break;
         case UIGestureRecognizerStateChanged:
@@ -64,6 +88,21 @@
                 
                 self.currentImageNode.position = newImagePosition;
                 _previousTouchLocation = [pan locationInView:self.view];
+            } else {
+                CGFloat newX = [pan locationInView:self.view].x;
+                _difference = newX - _previousTouchXPosition;
+                
+                [self moveAllNodesHorizontallyByDifference];
+                
+                _previousTouchXPosition = newX;
+                
+                if (vel.x > 0) {
+                    NSLog(@"RIGHT!! at %f velocity", vel.x);
+                    _horizontalScrollDirection = HorizontalScrollDirectionRight;
+                } else {
+                    NSLog(@"LEFT!! at %f velocity", vel.x);
+                    _horizontalScrollDirection = HorizontalScrollDirectionLeft;
+                }
             }
             break;
         case UIGestureRecognizerStateEnded:
@@ -76,6 +115,19 @@
         default:
             break;
     }
+}
+
+- (void)moveAllNodesHorizontallyByDifference;
+{
+    ASDisplayNode *firstNode = (ASDisplayNode *)self.imageNodes[0];
+    ASDisplayNode *lastNode = (ASDisplayNode *)self.imageNodes.lastObject;
+    CGFloat sweetSpotXValue = self.frame.size.width - lastNode.frame.size.width;
+    
+    for (ASDisplayNode *node in self.imageNodes) {
+        CGPoint newCenter = CGPointMake((node.view.center.x + _difference), node.view.center.y);
+        node.view.center = newCenter;
+    }
+    
 }
 
 - (void)hide;

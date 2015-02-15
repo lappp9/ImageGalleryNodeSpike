@@ -134,7 +134,6 @@
     }
    
     if (![self isAnimatingIntoFullscreen]) {
-        NSLog(@"Going back to position with x: %f, y: %f", imageNode.position.x, imageNode.position.y);
         self.lastNodeTouched         = imageNode;
         self.lastNodeTouchedFrame    = imageNode.frame;
         self.lastNodeTouchedSize     = imageNode.frame.size;
