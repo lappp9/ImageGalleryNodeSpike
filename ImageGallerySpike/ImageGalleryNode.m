@@ -132,13 +132,16 @@
     } else {
         _shouldGoIntoFullscreen = YES;
     }
+   
+    if (![self isAnimatingIntoFullscreen]) {
+        NSLog(@"Going back to position with x: %f, y: %f", imageNode.position.x, imageNode.position.y);
+        self.lastNodeTouched         = imageNode;
+        self.lastNodeTouchedFrame    = imageNode.frame;
+        self.lastNodeTouchedSize     = imageNode.frame.size;
+        self.lastNodeTouchedPosition = imageNode.position;
+    }
     
     [self.view bringSubviewToFront:imageNode.view];
-
-    self.lastNodeTouched         = imageNode;
-    self.lastNodeTouchedFrame    = imageNode.frame;
-    self.lastNodeTouchedSize     = imageNode.frame.size;
-    self.lastNodeTouchedPosition = imageNode.position;
 }
 
 - (void)imageTouchedUpInside:(ASNetworkImageNode *)imageNode;
@@ -171,12 +174,18 @@
     cornerAnim.toValue = @(0);
     
     void (^completion)(POPAnimation *anim, BOOL completed) = ^(POPAnimation *anim, BOOL completed){
-        if (completed) {
+        POPAnimation *position = [self.lastNodeTouched pop_animationForKey:@"position"];
+        POPAnimation *size = [self.lastNodeTouched pop_animationForKey:@"size"];
+        POPAnimation *cornerRadius = [self.lastNodeTouched pop_animationForKey:@"cornerRadius"];
+        
+        
+        if (completed && !(position || size || cornerRadius)) {
             NSInteger index = [[self imageNodes] indexOfObject:self.lastNodeTouched];
             [self presentFullScreenImageGalleryStartingAtIndex:index];
             
             self.lastNodeTouched.cornerRadius = 4;
-            self.lastNodeTouched.frame = self.lastNodeTouchedFrame;
+            self.lastNodeTouched.position = self.lastNodeTouchedPosition;
+            self.lastNodeTouched.bounds = (CGRect){CGPointZero, _imageNodeSize};
             self.hiddenNode = self.lastNodeTouched;
             self.hiddenNode.hidden = YES;
             self.lastNodeTouched.zPosition = 1;
@@ -187,9 +196,9 @@
     sizeAnim.completionBlock = completion;
     cornerAnim.completionBlock = completion;
 
-    [self.lastNodeTouched pop_addAnimation:sizeAnim forKey:nil];
-    [self.lastNodeTouched pop_addAnimation:anim forKey:nil];
-    [self.lastNodeTouched pop_addAnimation:cornerAnim forKey:nil];
+    [self.lastNodeTouched pop_addAnimation:anim forKey:@"position"];
+    [self.lastNodeTouched pop_addAnimation:sizeAnim forKey:@"size"];
+    [self.lastNodeTouched pop_addAnimation:cornerAnim forKey:@"cornerRadius"];
     [self fadeInDarkBackground];
 }
 
@@ -206,7 +215,7 @@
 
 - (void)presentFullScreenImageGalleryStartingAtIndex:(NSInteger)index;
 {
-    self.fullScreenImageGalleryNode.sizeToAnimateBackTo     = self.lastNodeTouchedSize;
+    self.fullScreenImageGalleryNode.sizeToAnimateBackTo     = _imageNodeSize;
     self.fullScreenImageGalleryNode.positionToAnimateBackTo =  [self.view convertPoint:self.lastNodeTouchedPosition toView:self.view.superview];
     
     [self.fullScreenImageGalleryNode showAtIndex:index];
@@ -217,6 +226,8 @@
     _imageNodes      = @[].mutableCopy;
     _initialCenters  = @[].mutableCopy;
     _finalCenters    = @[].mutableCopy;
+    
+    _imageNodeSize = CGSizeMake([self.dataSource widthForImages], self.bounds.size.height);
     
     self.clipsToBounds   = NO;
     self.backgroundColor = [UIColor darkGrayColor];
@@ -334,23 +345,10 @@
             [self removeAnimationsFromNodes];
 
             if (abs(vel.y) > abs(vel.x)){
-                
                 _isPanningVertically = YES;
                 _previousTouchLocation = [pan locationInView:self.view];
-                
-                if (vel.y > 0) {
-                    NSLog(@"DOWN!! at %f velocity", vel.y);
-                } else {
-                    NSLog(@"UP!! at %f velocity", vel.y);
-                }
             } else {
                 _isPanningVertically = NO;
-                if (vel.x > 0) {
-                    NSLog(@"RIGHT!! at %f velocity", vel.x);
-
-                } else {
-                    NSLog(@"LEFT!! at %f velocity", vel.x);
-                }
             }
             self.touchXPosition = [pan locationInView:self.view].x;
             break;
@@ -385,7 +383,6 @@
                     [self addDecayAnimationToAllSubviewsWithVelocity:[pan velocityInView:self.view].x];
                 }
             }
-            
             _isPanningVertically = NO;
             break;
         default:
@@ -466,6 +463,15 @@
         anim.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut];
         [node.view pop_addAnimation:anim forKey:nil];
     }
+}
+
+- (BOOL)isAnimatingIntoFullscreen;
+{
+    POPAnimation *position = [self.lastNodeTouched pop_animationForKey:@"position"];
+    POPAnimation *size = [self.lastNodeTouched pop_animationForKey:@"size"];
+    POPAnimation *cornerRadius = [self.lastNodeTouched pop_animationForKey:@"cornerRadius"];
+
+    return (position || size || cornerRadius);
 }
 
 #pragma mark Full Screen View Delegate Methods

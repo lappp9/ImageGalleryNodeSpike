@@ -13,6 +13,7 @@
 
 @property (weak) id <ImageGalleryDatasource> dataSource;
 @property (weak) id <ImageGalleryDelegate> delegate;
+@property (nonatomic) CGSize imageNodeSize;
 
 @end
 
