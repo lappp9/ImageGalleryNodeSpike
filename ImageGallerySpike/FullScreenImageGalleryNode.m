@@ -190,24 +190,30 @@ typedef NS_ENUM(NSInteger, HorizontalScrollDirection) {
 
 - (void)showAtIndex:(NSInteger)index;
 {
-    //they should all be fine as far as the y position goes but i should calculate the desired X position of each
-    // one and move it to the correct spot
-    
     self.hidden = NO;
     self.backgroundColor = [UIColor blackColor];
     
     NSInteger numberOfSpots = index - _currentlyDisplayedNodeIndex;
     _currentlyDisplayedNodeIndex = index;
     
-    //((i * UIScreen.mainScreen.bounds.size.width) + (i * 8))
     CGFloat distanceToMove = -((numberOfSpots * UIScreen.mainScreen.bounds.size.width) + (numberOfSpots * 8));
     [self moveAllNodesHorizontallyBy:distanceToMove];
 
     self.currentImageNode = self.imageNodes[index];
 }
 
-- (CGFloat)xPositionForIndex;
+- (CGFloat)positionOfImageAtIndex:(NSUInteger)imageIndex withCurrentImageIndex:(NSUInteger)currentlyDisplayingImageIndex;
 {
+    // this method should return the correct x position of the specified image when the
+    // specifified current image is at the center of the screen
+    // will have something to do with the fact that each image to the right is
+    // (numberOfSpotsAway * UIScreen.mainScreen.bounds.size.width) + (numberOfSpots * 8) pixels away
+    
+    // I need to use this information to know how far away from the desired X position each image is at the PanDidEnd part
+    // of the horizontal panning
+    
+    // when you're done panning, figure out which way we're flipping and move all the nodes that direction by the appropriate amount
+    // so that the image you wanted to go to is at the center of the screen
     return 0;
 }
 
