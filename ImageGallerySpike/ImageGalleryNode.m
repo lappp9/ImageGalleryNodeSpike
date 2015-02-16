@@ -173,12 +173,8 @@
     cornerAnim.toValue = @(0);
     
     void (^completion)(POPAnimation *anim, BOOL completed) = ^(POPAnimation *anim, BOOL completed){
-        POPAnimation *position = [self.lastNodeTouched pop_animationForKey:@"position"];
-        POPAnimation *size = [self.lastNodeTouched pop_animationForKey:@"size"];
-        POPAnimation *cornerRadius = [self.lastNodeTouched pop_animationForKey:@"cornerRadius"];
-        
-        
-        if (completed && !(position || size || cornerRadius)) {
+
+        if (completed && ![self isAnimatingIntoFullscreen]) {
             NSInteger index = [[self imageNodes] indexOfObject:self.lastNodeTouched];
             [self presentFullScreenImageGalleryStartingAtIndex:index];
             
@@ -495,8 +491,10 @@
 - (void)imageNode:(ASNetworkImageNode *)imageNode didLoadImage:(UIImage *)image;
 {
     NSInteger i = [self.imageNodes indexOfObject:imageNode];
+    
+    CGSize imageSize = ((ASImageNode *)self.fullScreenImageGalleryNode.imageNodes[i]).bounds.size;
     ((ASImageNode *)self.fullScreenImageGalleryNode.imageNodes[i]).image = image;
-    ((ASImageNode *)self.fullScreenImageGalleryNode.imageNodes[i]).frame = CGRectMake(0, 0, UIScreen.mainScreen.bounds.size.width, [self proportionateHeightForImage:image]);
+    ((ASImageNode *)self.fullScreenImageGalleryNode.imageNodes[i]).bounds = (CGRect){CGPointZero, CGSizeMake(imageSize.width, [self proportionateHeightForImage:image])};
 }
 
 #pragma mark Utilities

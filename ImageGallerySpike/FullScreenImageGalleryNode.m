@@ -16,36 +16,48 @@ typedef NS_ENUM(NSInteger, HorizontalScrollDirection) {
 @property (nonatomic) CGFloat previousTouchXPosition;
 @property (nonatomic) HorizontalScrollDirection horizontalScrollDirection;
 
+@property (nonatomic) CGSize currentImageActualSize;
+@property (nonatomic) CGPoint currentImageActualPosition;
+
+@property NSUInteger currentlyDisplayedNodeIndex;
+
 @end
 
 @implementation FullScreenImageGalleryNode
-
-- (instancetype)initWithImages:(NSArray *)images;
-{
-    if (!(self = [super init])) { return nil; }
-    
-    self.imageNodes = @[].mutableCopy;
-    
-    for (NSInteger i = 0; i < images.count; i++) {
-        ASImageNode *node = [[ASImageNode alloc] init];
-        node.image = images[i];
-        node.view.userInteractionEnabled = YES;
-        node.clipsToBounds = YES;
-        node.contentMode = UIViewContentModeScaleAspectFill;
-        node.frame = CGRectMake(0, 0, UIScreen.mainScreen.bounds.size.width, [self proportionateHeightForImage:images[i]]);
-        node.placeholderColor = [UIColor orangeColor];
-        
-        self.imageNodes[i] = node;
-    }
-
-    return self;
-}
 
 - (void)didLoad;
 {
     [super didLoad];
     UIPanGestureRecognizer *pan = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(galleryDidPan:)];
     [self.view addGestureRecognizer:pan];
+}
+
+- (instancetype)initWithImages:(NSArray *)images;
+{
+    if (!(self = [super init])) { return nil; }
+    
+    self.imageNodes = @[].mutableCopy;
+    _currentlyDisplayedNodeIndex = 0;
+    
+    self.backgroundColor = [UIColor blackColor];
+    
+    for (NSInteger i = 0; i < images.count; i++) {
+        ASImageNode *node = [[ASImageNode alloc] init];
+        node.image = images[i];
+        node.userInteractionEnabled = YES;
+        node.clipsToBounds = YES;
+        node.contentMode = UIViewContentModeScaleAspectFill;
+        
+        CGFloat nodeXPosition = ((i * UIScreen.mainScreen.bounds.size.width) + (i * 8));
+        
+        node.frame = CGRectMake(nodeXPosition, 0, UIScreen.mainScreen.bounds.size.width, [self proportionateHeightForImage:images[i]]);
+        node.position = CGPointMake(node.position.x, UIScreen.mainScreen.bounds.size.height/2);
+        
+        [self addSubnode:node];
+        self.imageNodes[i] = node;
+    }
+
+    return self;
 }
 
 - (CGFloat)proportionateHeightForImage:(UIImage *)image;
@@ -61,6 +73,10 @@ typedef NS_ENUM(NSInteger, HorizontalScrollDirection) {
         case UIGestureRecognizerStateBegan:
             if (abs(vel.y) > abs(vel.x)){
                 _isPanningVertically = YES;
+                
+                self.currentImageActualPosition = self.currentImageNode.position;
+                self.currentImageActualSize     = self.currentImageNode.frame.size;
+                
                 self.backgroundColor = [UIColor clearColor];
                 _previousTouchLocation = [pan locationInView:self.view];
                 if (vel.y > 0) {
@@ -106,6 +122,8 @@ typedef NS_ENUM(NSInteger, HorizontalScrollDirection) {
             }
             break;
         case UIGestureRecognizerStateEnded:
+            // when this ends, if it's been animating left and right then figure out which direction it ended up going and move it by one that direction
+            NSLog(@"ENDEDDDDD!");
             if (_isPanningVertically) {
                 self.currentImageNode.view.center = self.view.center;
                 _isPanningVertically = NO;
@@ -119,23 +137,14 @@ typedef NS_ENUM(NSInteger, HorizontalScrollDirection) {
 
 - (void)moveAllNodesHorizontallyByDifference;
 {
-    ASDisplayNode *firstNode = (ASDisplayNode *)self.imageNodes[0];
-    ASDisplayNode *lastNode = (ASDisplayNode *)self.imageNodes.lastObject;
-    CGFloat sweetSpotXValue = self.frame.size.width - lastNode.frame.size.width;
-    
     for (ASDisplayNode *node in self.imageNodes) {
         CGPoint newCenter = CGPointMake((node.view.center.x + _difference), node.view.center.y);
         node.view.center = newCenter;
     }
-    
 }
 
 - (void)hide;
 {
-    CGSize  originalSize         = self.currentImageNode.frame.size;
-    CGPoint originalPosition     = self.currentImageNode.position;
-    CGFloat originalCornerRadius = 0;
-    
     POPSpringAnimation *anim = [POPSpringAnimation animationWithPropertyNamed:kPOPLayerPosition];
     anim.toValue = [NSValue valueWithCGPoint: self.positionToAnimateBackTo];
     anim.springBounciness = 5;
@@ -151,18 +160,13 @@ typedef NS_ENUM(NSInteger, HorizontalScrollDirection) {
     cornerAnim.toValue = @(4);
     
     void (^completion)(POPAnimation *anim, BOOL completed) = ^(POPAnimation *anim, BOOL completed){
-        if (completed) {
+        if (![self isAnimatingOutOfFullscreen]) {
             [self.delegate unhideHiddenView];
 
             self.hidden = YES;
             
-            self.currentImageNode.frame = CGRectMake(0, 0, originalSize.width, originalSize.height);
-            self.currentImageNode.position = originalPosition;
-            self.currentImageNode.cornerRadius = originalCornerRadius;
-            
-            for (ASNetworkImageNode *node in self.subnodes) {
-                [node removeFromSupernode];
-            }
+            self.currentImageNode.bounds = CGRectMake(0, 0, self.currentImageActualSize.width, self.currentImageActualSize.height);
+            self.currentImageNode.position = self.currentImageActualPosition;
         }
     };
     
@@ -170,20 +174,49 @@ typedef NS_ENUM(NSInteger, HorizontalScrollDirection) {
     sizeAnim.completionBlock = completion;
     cornerAnim.completionBlock = completion;
     
-    [self.currentImageNode.layer pop_addAnimation:anim forKey:nil];
-    [self.currentImageNode.layer pop_addAnimation:cornerAnim forKey:nil];
-    [self.currentImageNode.layer pop_addAnimation:sizeAnim forKey:nil];
+    [self.currentImageNode pop_addAnimation:anim forKey:@"position"];
+    [self.currentImageNode pop_addAnimation:cornerAnim forKey:@"cornerRadius"];
+    [self.currentImageNode pop_addAnimation:sizeAnim forKey:@"size"];
+}
+
+- (BOOL)isAnimatingOutOfFullscreen;
+{
+    POPAnimation *position = [self.currentImageNode pop_animationForKey:@"position"];
+    POPAnimation *size = [self.currentImageNode pop_animationForKey:@"size"];
+    POPAnimation *cornerRadius = [self.currentImageNode pop_animationForKey:@"cornerRadius"];
+    
+    return (position || size || cornerRadius);
 }
 
 - (void)showAtIndex:(NSInteger)index;
 {
+    //they should all be fine as far as the y position goes but i should calculate the desired X position of each
+    // one and move it to the correct spot
+    
     self.hidden = NO;
     self.backgroundColor = [UIColor blackColor];
-    ASImageNode *node = (ASImageNode *)self.imageNodes[index];
-    node.position = self.view.center;
+    
+    NSInteger numberOfSpots = index - _currentlyDisplayedNodeIndex;
+    _currentlyDisplayedNodeIndex = index;
+    
+    //((i * UIScreen.mainScreen.bounds.size.width) + (i * 8))
+    CGFloat distanceToMove = -((numberOfSpots * UIScreen.mainScreen.bounds.size.width) + (numberOfSpots * 8));
+    [self moveAllNodesHorizontallyBy:distanceToMove];
 
-    self.currentImageNode = node;
-    [self addSubnode:node];
+    self.currentImageNode = self.imageNodes[index];
+}
+
+- (CGFloat)xPositionForIndex;
+{
+    return 0;
+}
+
+- (void)moveAllNodesHorizontallyBy:(NSInteger)amount;
+{
+    for (ASNetworkImageNode *node in self.imageNodes) {
+        CGPoint newCenter = CGPointMake((node.view.center.x + amount), node.view.center.y);
+        node.position = newCenter;
+    }
 }
 
 @end
