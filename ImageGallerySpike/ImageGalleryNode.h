@@ -24,6 +24,7 @@
 - (CGFloat)widthForImages;
 
 - (NSInteger)numberOfRowsInImageGallery:(ImageGalleryNode *)imageGallery;
+- (CGFloat)numberOfVisibleColumnsInImageGallery:(ImageGalleryNode *)imageGallery;
 - (NSInteger)paddingForImagesInImageGallery:(ImageGalleryNode *)imageGallery;
 
 

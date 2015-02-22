@@ -64,6 +64,11 @@
     return 2;
 }
 
+- (CGFloat)numberOfVisibleColumnsInImageGallery:(ImageGalleryNode *)imageGallery;
+{
+    return 2.25;
+}
+
 - (NSInteger)paddingForImagesInImageGallery:(ImageGalleryNode *)imageGallery;
 {
     return 2;

@@ -62,22 +62,21 @@
     
     NSInteger numberOfImages = [self.dataSource numberOfImagesInImageGallery:self];
 
-    NSInteger rowCount = [self.dataSource numberOfRowsInImageGallery:self]; //1;
-    CGFloat padding = [self.dataSource paddingForImagesInImageGallery:self]; // 2;
+    NSInteger rowCount = [self.dataSource numberOfRowsInImageGallery:self];
+    CGFloat visibleColumnCount = [self.dataSource numberOfVisibleColumnsInImageGallery:self];
+    CGFloat padding = [self.dataSource paddingForImagesInImageGallery:self];
     
-    CGFloat availableWidth = (self.frame.size.width - (padding * (rowCount +1)));
-    CGFloat availableHeight = (self.frame.size.height - (padding * (rowCount +1)));
+    CGFloat availableWidth = (self.frame.size.width - (padding * (visibleColumnCount + 1)));
+    CGFloat availableHeight = (self.frame.size.height - (padding * (rowCount + 1)));
     
-    CGFloat imageNodeWidth = (availableWidth/rowCount) - 25;
+    CGFloat imageNodeWidth = (availableWidth/visibleColumnCount);
     CGFloat imageNodeHeight = (availableHeight/rowCount);
 
     CGFloat column = 0;
  
     for (NSInteger i = 0; i < numberOfImages; i++) {
         NSInteger row = (i + rowCount) % rowCount;
-        if (row == 0) {
-            column++;
-        }
+        if (row == 0) { column++; }
         
         ASNetworkImageNode *imageNode = [[ASNetworkImageNode alloc] init];
         imageNode.delegate = self;
