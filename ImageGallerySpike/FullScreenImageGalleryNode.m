@@ -105,13 +105,6 @@ typedef NS_ENUM(NSInteger, HorizontalScrollDirection) {
                 self.currentImageNode.position = newImagePosition;
                 _previousTouchLocation = [pan locationInView:self.view];
             } else {
-                CGFloat newX = [pan locationInView:self.view].x;
-                _difference = newX - _previousTouchXPosition;
-                
-                [self moveAllNodesHorizontallyByDifference];
-                
-                _previousTouchXPosition = newX;
-                
                 if (vel.x > 0) {
                     NSLog(@"RIGHT!! at %f velocity", vel.x);
                     _horizontalScrollDirection = HorizontalScrollDirectionRight;

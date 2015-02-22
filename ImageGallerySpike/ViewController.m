@@ -35,10 +35,11 @@
 //    if (index == 0) {
 //        return [NSURL URLWithString:@"http://img.vast.com/original/4004703374594052526"];
 //    }
-//    
-    CGFloat rand1 = arc4random_uniform(200) + 200;
-    CGFloat rand2 = arc4random_uniform(200) + 200;
-    NSURL *kittenURL = [NSURL URLWithString:[NSString stringWithFormat:@"http://placekitten.com/%i/%i", (int)rand1, (int)rand2]];
+
+    u_int32_t deltaX = arc4random_uniform(10) - 5;
+    u_int32_t deltaY = arc4random_uniform(10) - 5;
+    CGSize size = CGSizeMake(350 + 2 * deltaX, 350 + 4 * deltaY);
+    NSURL *kittenURL = [NSURL URLWithString:[NSString stringWithFormat:@"http://placekitten.com/%i/%i", (int)size.width, (int)size.height]];
     
     return kittenURL;
 }

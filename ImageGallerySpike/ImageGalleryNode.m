@@ -42,19 +42,6 @@
  
 */
 
-#pragma mark View Drawing
-
-+ (void)drawRect:(CGRect)bounds
-  withParameters:(id<NSObject>)parameters
-     isCancelled:(asdisplaynode_iscancelled_block_t)isCancelledBlock
-   isRasterizing:(BOOL)isRasterizing
-{
-    if (!isRasterizing) {
-        [[UIColor whiteColor] set];
-        UIRectFill(bounds);
-    }
-}
-
 - (void)didLoad;
 {
     [super didLoad];
@@ -225,7 +212,7 @@
     _imageNodeSize = CGSizeMake([self.dataSource widthForImages], self.bounds.size.height);
     
     self.clipsToBounds   = NO;
-    self.backgroundColor = [UIColor darkGrayColor];
+    self.backgroundColor = [UIColor clearColor];
     
     CGSize screenSize      = [[UIScreen mainScreen] bounds].size;
     CGRect fullscreenFrame = [self.view.superview convertRect:CGRectMake(0, 0, screenSize.width, screenSize.height) toView:self.view];
