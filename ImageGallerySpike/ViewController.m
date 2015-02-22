@@ -5,6 +5,8 @@
 
 @property (nonatomic) ImageGalleryNode *imageGallery;
 @property (nonatomic) RainbowNode *rainbow;
+@property (nonatomic) CGFloat screenWidth;
+@property (nonatomic) CGFloat screenHeight;
 @end
 
 @implementation ViewController
@@ -12,10 +14,17 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
+    _screenWidth = [UIScreen mainScreen].bounds.size.width;
+    _screenHeight = [UIScreen mainScreen].bounds.size.height;
+    
+    self.view.backgroundColor = [UIColor orangeColor];
+    
     self.edgesForExtendedLayout = UIRectEdgeNone;
     
     ImageGalleryNode *imageGallery = [[ImageGalleryNode alloc] init];
-    imageGallery.frame = CGRectMake(0, self.view.frame.size.height - 250, self.view.frame.size.width, 250);
+//    imageGallery.frame = CGRectMake(0, self.view.frame.size.height - 250, self.view.frame.size.width, 250);
+    imageGallery.frame = CGRectMake(0, 0, _screenWidth, _screenHeight/2);
+    imageGallery.backgroundColor = [UIColor blueColor];
     imageGallery.cornerRadius = 4;
     imageGallery.dataSource = self;
     imageGallery.delegate = self;
@@ -32,10 +41,6 @@
 
 - (NSURL *)imageGallery:(ImageGalleryNode *)imageGallery urlForImageAtIndex:(NSInteger)index;
 {
-//    if (index == 0) {
-//        return [NSURL URLWithString:@"http://img.vast.com/original/4004703374594052526"];
-//    }
-
     u_int32_t deltaX = arc4random_uniform(10) - 5;
     u_int32_t deltaY = arc4random_uniform(10) - 5;
     CGSize size = CGSizeMake(350 + 2 * deltaX, 350 + 4 * deltaY);
@@ -46,7 +51,7 @@
 
 - (NSInteger)numberOfImagesInImageGallery:(ImageGalleryNode *)imageGallery;
 {
-    return 5;
+    return 20;
 }
 
 - (CGFloat)widthForImages;
@@ -54,11 +59,21 @@
     return self.view.bounds.size.width - 16 - 50;
 }
 
+- (NSInteger)numberOfRowsInImageGallery:(ImageGalleryNode *)imageGallery;
+{
+    return 2;
+}
+
+- (NSInteger)paddingForImagesInImageGallery:(ImageGalleryNode *)imageGallery;
+{
+    return 2;
+}
+
 #pragma mark Image Gallery Delegate
 
 - (BOOL)imageGalleryShouldDisplayPositions;
 {
-    return NO;
+    return YES;
 }
 
 - (BOOL)prefersStatusBarHidden;
@@ -69,7 +84,7 @@
 - (BOOL)imageGalleryShouldAllowFullScreenMode;
 {
     //this way you can prevent newing up the images twice if you don't need to
-    return YES;
+    return NO;
 }
 
 @end

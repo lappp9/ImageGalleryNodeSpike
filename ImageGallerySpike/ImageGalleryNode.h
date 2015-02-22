@@ -23,6 +23,10 @@
 - (NSURL *)imageGallery:(ImageGalleryNode *)imageGallery urlForImageAtIndex:(NSInteger)index;
 - (CGFloat)widthForImages;
 
+- (NSInteger)numberOfRowsInImageGallery:(ImageGalleryNode *)imageGallery;
+- (NSInteger)paddingForImagesInImageGallery:(ImageGalleryNode *)imageGallery;
+
+
 @end
 
 @protocol ImageGalleryDelegate <NSObject>

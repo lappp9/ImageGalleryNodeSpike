@@ -53,24 +53,43 @@
 - (void)layout;
 {
     [super layout];
-
+    
     if (self.view.subviews.count != 0) {
         return;
     }
     
     [self setupInitialState];
-
-    NSInteger numberOfImages = [self.dataSource numberOfImagesInImageGallery:self];
     
-    for (int i = 0; i < numberOfImages; i++) {
-        CGFloat imageNodeWidth = [self.dataSource widthForImages];
-        CGFloat imageNodeHeight = self.bounds.size.height;
+    NSInteger numberOfImages = [self.dataSource numberOfImagesInImageGallery:self];
+
+    NSInteger rowCount = [self.dataSource numberOfRowsInImageGallery:self]; //1;
+    CGFloat padding = [self.dataSource paddingForImagesInImageGallery:self]; // 2;
+    
+    CGFloat availableWidth = (self.frame.size.width - (padding * (rowCount +1)));
+    CGFloat availableHeight = (self.frame.size.height - (padding * (rowCount +1)));
+    
+    CGFloat imageNodeWidth = (availableWidth/rowCount) - 25;
+    CGFloat imageNodeHeight = (availableHeight/rowCount);
+
+    CGFloat column = 0;
+ 
+    for (NSInteger i = 0; i < numberOfImages; i++) {
+        NSInteger row = (i + rowCount) % rowCount;
+        if (row == 0) {
+            column++;
+        }
         
         ASNetworkImageNode *imageNode = [[ASNetworkImageNode alloc] init];
         imageNode.delegate = self;
+        imageNode.backgroundColor = [UIColor greenColor];
 
         imageNode.URL                    = [self.dataSource imageGallery:self urlForImageAtIndex:i];
-        imageNode.frame                  = CGRectMake(((i * imageNodeWidth) + (i * 4)), 0, imageNodeWidth, imageNodeHeight);
+        
+        CGFloat xPosition = ((column-1) * imageNodeWidth) + (padding * column);
+        CGFloat yPosition = (row * imageNodeHeight) + ((padding * (row + 1)));
+
+        imageNode.frame                  = CGRectMake(xPosition, yPosition, imageNodeWidth, imageNodeHeight);
+        
         imageNode.cornerRadius           = 4;
         imageNode.clipsToBounds          = YES;
         imageNode.userInteractionEnabled = YES;
@@ -120,7 +139,7 @@
         _shouldGoIntoFullscreen = YES;
     }
    
-    if (![self isAnimatingIntoFullscreen]) {
+    if ([self isAnimatingIntoFullscreen]) {
         self.lastNodeTouched         = imageNode;
         self.lastNodeTouchedFrame    = imageNode.frame;
         self.lastNodeTouchedSize     = imageNode.frame.size;
@@ -132,9 +151,9 @@
 
 - (void)imageTouchedUpInside:(ASNetworkImageNode *)imageNode;
 {
-    if (_shouldGoIntoFullscreen) {
-        [self animateIntoFullScreenMode];
-    }
+//    if (_shouldGoIntoFullscreen) {
+//        [self animateIntoFullScreenMode];
+//    }
 }
 
 - (void)animateIntoFullScreenMode;
@@ -212,7 +231,7 @@
     _imageNodeSize = CGSizeMake([self.dataSource widthForImages], self.bounds.size.height);
     
     self.clipsToBounds   = NO;
-    self.backgroundColor = [UIColor clearColor];
+    self.backgroundColor = [UIColor blueColor];
     
     CGSize screenSize      = [[UIScreen mainScreen] bounds].size;
     CGRect fullscreenFrame = [self.view.superview convertRect:CGRectMake(0, 0, screenSize.width, screenSize.height) toView:self.view];
@@ -257,7 +276,7 @@
         labelBackground.backgroundColor = [UIColor darkGrayColor];
         labelBackground.alpha = 0.5;
         
-        NSString *labelString = [NSString stringWithFormat:@"%lu of %ld", [self.imageNodes indexOfObject:imageNode]+1, self.imageNodes.count];
+        NSString *labelString = [NSString stringWithFormat:@"%lu of %ld", [self.imageNodes indexOfObject:imageNode]+1, (unsigned long)self.imageNodes.count];
         UILabel *number = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 60, 20)];
         number.text = labelString;
         number.backgroundColor = [UIColor clearColor];
@@ -477,11 +496,11 @@
 
 - (void)imageNode:(ASNetworkImageNode *)imageNode didLoadImage:(UIImage *)image;
 {
-    NSInteger i = [self.imageNodes indexOfObject:imageNode];
-    
-    CGSize imageSize = ((ASImageNode *)self.fullScreenImageGalleryNode.imageNodes[i]).bounds.size;
-    ((ASImageNode *)self.fullScreenImageGalleryNode.imageNodes[i]).image = image;
-    ((ASImageNode *)self.fullScreenImageGalleryNode.imageNodes[i]).bounds = (CGRect){CGPointZero, CGSizeMake(imageSize.width, [self proportionateHeightForImage:image])};
+//    NSInteger i = [self.imageNodes indexOfObject:imageNode];
+//    
+//    CGSize imageSize = ((ASImageNode *)self.fullScreenImageGalleryNode.imageNodes[i]).bounds.size;
+//    ((ASImageNode *)self.fullScreenImageGalleryNode.imageNodes[i]).image = image;
+//    ((ASImageNode *)self.fullScreenImageGalleryNode.imageNodes[i]).bounds = (CGRect){CGPointZero, CGSizeMake(imageSize.width, [self proportionateHeightForImage:image])};
 }
 
 #pragma mark Utilities
