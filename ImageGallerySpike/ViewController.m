@@ -51,7 +51,7 @@
 
 - (NSInteger)numberOfImagesInImageGallery:(ImageGalleryNode *)imageGallery;
 {
-    return 20;
+    return 10;
 }
 
 - (CGFloat)widthForImages;

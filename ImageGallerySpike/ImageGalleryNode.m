@@ -13,6 +13,7 @@
 
 @property (nonatomic) NSMutableArray *initialCenters;
 @property (nonatomic) NSMutableArray *finalCenters;
+@property (nonatomic) NSMutableArray *finalFrames;
 
 @property (nonatomic) BOOL isPanningVertically;
 @property (nonatomic) BOOL shouldGoIntoFullscreen;
@@ -70,6 +71,7 @@
     CGFloat availableHeight = (self.frame.size.height - (padding * (rowCount + 1)));
     
     CGFloat imageNodeWidth = (availableWidth/visibleColumnCount);
+    
     CGFloat imageNodeHeight = (availableHeight/rowCount);
 
     CGFloat column = 0;
@@ -125,8 +127,15 @@
     if ([self.delegate imageGalleryShouldDisplayPositions]) {
         [self addPositionLabelsToImageNodes];
     }
+    [self calculateFinalFrames];
     
-    [self calculateFinalCenters];
+    [self.imageNodes enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+        ASNetworkImageNode *image = (ASNetworkImageNode *)obj;
+        
+        image.frame = ((NSValue *)self.finalFrames[idx]).CGRectValue;
+    }];
+    
+//    [self calculateFinalCenters];
 }
 
 - (void)imageTouchedDown:(ASNetworkImageNode *)imageNode;
@@ -226,6 +235,7 @@
     _imageNodes      = @[].mutableCopy;
     _initialCenters  = @[].mutableCopy;
     _finalCenters    = @[].mutableCopy;
+    _finalFrames     = @[].mutableCopy;
     
     _imageNodeSize = CGSizeMake([self.dataSource widthForImages], self.bounds.size.height);
     
@@ -263,6 +273,29 @@
     }
     
     self.finalCenters = [[self.finalCenters reverseObjectEnumerator] allObjects].mutableCopy;
+}
+
+- (void)calculateFinalFrames;
+{
+    CGFloat visibleColumnCount = [self.dataSource numberOfVisibleColumnsInImageGallery:self];
+    CGFloat padding = [self.dataSource paddingForImagesInImageGallery:self];
+    CGFloat availableWidth = (self.frame.size.width - (padding * (visibleColumnCount + 1)));
+    CGFloat imageNodeWidth = (availableWidth/visibleColumnCount);
+    
+    CGFloat numPhotos = [self.dataSource numberOfImagesInImageGallery:self]/[self.dataSource numberOfRowsInImageGallery:self];
+    CGFloat onScreen = [self.dataSource numberOfVisibleColumnsInImageGallery:self];
+//    CGFloat width = [self.dataSource widthForImages];
+    CGFloat amountToMoveLeft = ( (numPhotos - onScreen) * imageNodeWidth + ((numPhotos - ceil(onScreen)) * padding) );
+    
+    for (ASNetworkImageNode *imageNode in self.imageNodes) {
+        CGSize size = imageNode.frame.size;
+        CGPoint origin = imageNode.frame.origin;
+
+        CGFloat newX = origin.x - amountToMoveLeft;
+        
+        CGRect finalFrame = CGRectMake(newX, origin.y, size.width, size.height);
+        [self.finalFrames addObject:[NSValue valueWithCGRect:finalFrame]];
+    }
 }
 
 - (void)addPositionLabelsToImageNodes;
@@ -440,16 +473,16 @@
 
 - (void)animateViewsBackToEndingPosition;
 {
-    for (ASDisplayNode *node in self.imageNodes) {
-        NSUInteger i = [self.imageNodes indexOfObject:node];
-    
-        POPBasicAnimation *anim = [POPBasicAnimation animationWithPropertyNamed:kPOPViewCenter];
-        anim.fromValue = [NSValue valueWithCGPoint:node.view.center];
-        anim.toValue = self.finalCenters[i];
-        anim.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut];
-    
-        [node.view pop_addAnimation:anim forKey:nil];
-    }
+//    for (ASDisplayNode *node in self.imageNodes) {
+//        NSUInteger i = [self.imageNodes indexOfObject:node];
+//    
+//        POPBasicAnimation *anim = [POPBasicAnimation animationWithPropertyNamed:kPOPViewCenter];
+//        anim.fromValue = [NSValue valueWithCGPoint:node.view.center];
+//        anim.toValue = self.finalCenters[i];
+//        anim.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut];
+//    
+//        [node.view pop_addAnimation:anim forKey:nil];
+//    }
 }
 
 - (void)animateViewsBackToStartingPosition;
